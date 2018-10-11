@@ -400,34 +400,28 @@ namespace gr {
 	  produce(1, written_sync);
 	      
 	      
-	if(RN16_index != -1){
-	// #2 modified code : sampling all bits
-	for(int j = RN16_index - n_samples_TAG_BIT / 2 ; j < ninput_items[0] ; j++) 
-	{
-		number_of_points++;
-		RN16_samples_complex.push_back(in[j]);
-		
-		if(number_of_points == n_samples_TAG_BIT * RN16_BITS)
-			break;
-	}}
-
-        // RN16 bits are passed to the next block for the creation of ACK message
-        // #1
-        // if (number_of_half_bits == 2*(RN16_BITS-1))
-        // #2
+	// RN16 bits are passed to the next block for the creation of ACK message
+          if ((RN16_index > 0.0f))//&&(ninput_items[0]>6000))
+          {  
+            for(int j = (int)(RN16_index); j < std::min(ninput_items[0]+(int)RN16_index, (int)(RN16_index+(RN16_BITS+2)*n_samples_TAG_BIT)); j++) 
+              RN16_samples_complex.push_back(in[j]);  //subtracting h_est(avg value) and save it in RN16_samples_complex
 	std::cout << "                                             " << number_of_points << std::endl;
-        if(number_of_points == n_samples_TAG_BIT * RN16_BITS)
-        {  
-          GR_LOG_INFO(d_debug_logger, "RN16 DECODED");
-          std::cout << "                                           DECODING : ";
-          RN16_bits  = tag_detection_RN16(RN16_samples_complex, RN16_index);
-          std::cout << std::endl;
+            std::vector<float> tag_bits;
 
-          for(int bit=0; bit<RN16_bits.size(); bit++)
+          GR_LOG_INFO(d_debug_logger, "RN16 DECODED");
+	    std::cout << "Now decoding RN16" << std::endl;
+            tag_bits = bit_decoding(RN16_samples_complex,RN16_BITS,0);
+	    std::cout << "RN16_BITS: ";
+		  
+
+
+          for(int bit=0; bit<tag_bits.size(); bit++)
           {
-            out[written] =  RN16_bits[bit];
+            out[written] =  tag_bits[bit];
+	    std::cout << tag_bits[bit];
             written ++;
           }
+		  std::cout << std::endl;
           produce(0,written);
           reader_state->gen2_logic_status = SEND_ACK;
         }
