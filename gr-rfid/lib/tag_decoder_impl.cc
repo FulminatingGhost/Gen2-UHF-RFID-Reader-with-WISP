@@ -242,6 +242,123 @@ namespace gr {
       return tag_bits;
     }
 
+#define SHIFT_SIZE 3
+    std::vector<float> tag_decoder_impl::bit_decoding(
+        std::vector<gr_complex> &samples_complex,
+        int                     n_expected_bit,
+        int                     index)
+    {
+      std::vector<float> tag_bits;
+      
+
+      const float masks[4][4] = {
+        {-1, 1, -1, 1},
+        {1, -1, 1, -1},
+        {1, -1, -1, 1},
+        {-1, 1, 1, -1}
+      };
+      int start, end;
+      int shift_cum=0;
+
+      preamble_fp = fopen(("decode_data/"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
+      if(!preamble_fp) std::cout << "(tag_decoding_impl.cpp::bit_decoding)File open error!" << std::endl;
+      
+      //decode bit every round
+      for (int i = 0; i < n_expected_bit; i++) {
+        float corr[SHIFT_SIZE*2+1][4] = {0.0f,};
+        //std::cout << i << std::endl;
+        fprintf(preamble_fp,"%d ",i);
+        start = (int)(i*n_samples_TAG_BIT)+shift_cum;
+        end = start + (int)(2*n_samples_TAG_BIT);
+
+        float average_amp = 0;
+
+        for(int j = start;j < end; j++)
+          average_amp += samples_complex[j].real();
+
+        average_amp = average_amp/(int)(n_samples_TAG_BIT * 2);
+
+	//std::cout << "average_amp: " << average_amp << std::endl;
+        //calculating correlation values
+        for (int j = 0; j < 4; j++) {
+          for (int k = start+SHIFT_SIZE; k < end-SHIFT_SIZE; k++) {
+            int devi = 0;
+            int position = k-start;
+
+            if(position<(n_samples_TAG_BIT*0.5))  //first quarter
+              devi = 0;
+            else if(position<(n_samples_TAG_BIT)) //second quarter
+              devi = 1;
+            else if(position<(n_samples_TAG_BIT*1.5)) //third quarter
+              devi = 2;
+            else  //last quarter
+              devi = 3;
+            if(j==0){
+              fprintf(preamble_fp, ", ");
+              fprintf(preamble_fp, "%f", samples_complex[k].real());
+              //std::cout << samples_complex[k].real() << std::endl;
+	    }
+            for(int l=-SHIFT_SIZE;l<=SHIFT_SIZE;l++){
+              corr[l+SHIFT_SIZE][j] += masks[j][devi] * (std::real(samples_complex[k+l])-average_amp);  //calculate
+            }
+          }
+        }
+        fprintf(preamble_fp, "\n%d ",i);
+
+        int maxidx[SHIFT_SIZE*2+1] = {0,};
+        int secondidx[SHIFT_SIZE*2+1] = {0,};
+
+        //find the most maximum correlation values
+        for (int i = 0; i < 4; i++) {
+          for(int j=0; j<=SHIFT_SIZE*2; j++){
+            if (corr[j][i] > corr[j][maxidx[j]]){
+              secondidx[j] = maxidx[j];
+              maxidx[j] = i;
+            }else if(corr[j][i] > corr[j][secondidx[j]])
+              secondidx[j] = i;
+          }
+        }
+
+        for(int i = 0;i<=SHIFT_SIZE*2;i++){
+          fprintf(preamble_fp,", %d",maxidx[i]);
+        }
+        fprintf(preamble_fp, "\n%d ",i);
+        for(int i = 0;i<=SHIFT_SIZE*2;i++){
+          fprintf(preamble_fp,", %f",corr[i][maxidx[i]]);
+        }
+
+        int shift = 0;  //actual value is shift-2
+        float diff[SHIFT_SIZE*2+1];
+
+
+        //find out whether shift or not
+        for (int i = 0; i<SHIFT_SIZE*2+1;i++){
+          if(corr[i][maxidx[i]] > corr[shift][maxidx[shift]])
+            shift = i;
+        }
+        fprintf(preamble_fp, "\n");
+
+        //std::cout<<shift-SHIFT_SIZE<<" ";
+
+        shift_cum += (shift-SHIFT_SIZE);
+
+        //based on maximum correlation value, decode the tag bits
+        if (maxidx[shift] <= 1){
+          tag_bits.push_back(0);
+        }
+        else{
+          tag_bits.push_back(1);
+        }
+      }
+
+      fclose(preamble_fp);
+      //std::cout<<std::endl<<"shift cum : "<<shift_cum<<std::endl;
+
+
+      return tag_bits;
+    }	  
+	  
+	  
 
     int
     tag_decoder_impl::general_work (int noutput_items,
