@@ -1,0 +1,6 @@
+#!/bin/bash
+
+./run_command $1
+cp -u ../misc/data/gate 50mw/$1/
+#python3 gather.py $1
+#python3 0124.py $1
