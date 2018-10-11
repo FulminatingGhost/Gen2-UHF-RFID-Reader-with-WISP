@@ -396,6 +396,11 @@ namespace gr {
 	  for(int j=0 ; j < n_samples_TAG_BIT * 6 ; j++)
 		  std::cout << in[RN16_index+j] << " ";
 	      
+	  FILE* file = fopen("tag_sync", "a");
+	  for(int j=0 ; j < n_samples_TAG_BIT * 6 ; j++)
+		  fprintf(file, "%f ", in[RN16_index+j].real());
+	  fclose(file);
+	      
           std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
 
 	  for(int j=0 ; j<ninput_items[0] ; j++)
