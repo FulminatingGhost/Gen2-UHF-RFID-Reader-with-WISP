@@ -149,7 +149,7 @@ namespace gr {
       }
       //std::cout << std::endl << "max: " << max << std::endl;
       	  FILE* file = fopen("max_corr", "a");
-	  fprintf(file, "sum: %f ", sum);
+	  fprintf(file, "sum: %f ", sum.real());
 	  fprintf(file, "max: %f ", max);
 	  fclose(file);
       h_est = sum;
