@@ -140,14 +140,14 @@ namespace gr {
         }
         //corr = std::norm(corr2) / nom;
         corr = corr2.real();
-	std::cout << corr << " ";
+	//std::cout << corr << " ";
         if (corr > max)
         {
           max = corr;
           max_index = i;
         }
       }
-      std::cout << std::endl << "max: " << max << std::endl;
+      //std::cout << std::endl << "max: " << max << std::endl;
       	  FILE* file = fopen("max_corr", "a");
 	  fprintf(file, "%f ", max);
 	  fclose(file);
