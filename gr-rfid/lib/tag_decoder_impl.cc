@@ -442,13 +442,16 @@ namespace gr {
 		  //std::cout << in[RN16_index+j] << " ";
 	      
 	  FILE* file = fopen("tag_sync", "a");
-	  fprintf(file, "preamble 6bits\n");
+	  fprintf(file, "all bits\n");
+	  for(int j=0 ; j<ninput_items[0] ; j++)
+		  fprintf(file, "%f ", in[j].real());
+	  fprintf(file, "\n\npreamble 6bits\n");
 	  for(int j=n_samples_TAG_BIT * 6 ; j > 0 ; j--){std::cout << RN16_index-j << " ";
 		  fprintf(file, "%f ", in[RN16_index-j].real());}
 	  fprintf(file, "\n\nRN16 16bits + end of signal 1bit\n");std::cout << std::endl << std::endl;
 	  for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++){std::cout << RN16_index+j << " ";
 		  fprintf(file, "%f ", in[RN16_index+j].real());}std::cout << std::endl << std::endl;
-	  fprintf(file, "\n");
+	  fprintf(file, "\n\n");
 	  fclose(file);
 	      
           std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
