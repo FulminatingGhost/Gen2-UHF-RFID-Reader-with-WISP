@@ -140,12 +140,14 @@ namespace gr {
         }
         //corr = std::norm(corr2) / nom;
         corr = corr2.real();
+	std::cout << corr < " ";
         if (corr > max)
         {
           max = corr;
           max_index = i;
         }
       }
+      std::cout << std::ednl << "max: " << max << std::endl;
       h_est = sum;
       max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT - n_samples_TAG_BIT/2;
       if(max > 0.01f) 
