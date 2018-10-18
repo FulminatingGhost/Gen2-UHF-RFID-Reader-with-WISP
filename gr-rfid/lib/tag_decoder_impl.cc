@@ -443,7 +443,7 @@ namespace gr {
 	      
 	  FILE* file = fopen("tag_sync", "a");
 	  fprintf(file, "preamble 6bits\n");
-	  for(int j=n_samples_TAG_BIT * 6 ; j < 0 ; j++)
+	  for(int j=n_samples_TAG_BIT * 6 ; j > 0 ; j--)
 		  fprintf(file, "%f ", in[RN16_index-j].real());
 	  fprintf(file, "\n\nRN16 16bits + end of signal 1bit\n");
 	  for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
