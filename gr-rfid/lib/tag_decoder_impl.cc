@@ -140,7 +140,7 @@ namespace gr {
         }
         //corr = std::norm(corr2) / nom;
         corr = corr2.real();
-	std::cout << corr < " ";
+	std::cout << corr << " ";
         if (corr > max)
         {
           max = corr;
