@@ -75,6 +75,7 @@ namespace gr {
         ninput_items_required[0] = noutput_items;
     }
 
+	  /*
     int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex* out, int size)
     {
       int max_index = 0;
@@ -111,9 +112,9 @@ namespace gr {
       // Shifted received waveform by n_samples_TAG_BIT/2
       max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT + n_samples_TAG_BIT/2;
       return max_index;  
-    }
+    }*/
 	  
-/*    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
+    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
     {
       int max_index = 0;
       float max = 0,corr;
@@ -152,7 +153,7 @@ namespace gr {
       else
         return -max_index;
 
-    }*/
+    }
 
 
     std::vector<float>  tag_decoder_impl::tag_detection_RN16(std::vector<gr_complex> & RN16_samples_complex, int RN16_index)
@@ -431,11 +432,11 @@ namespace gr {
           std::cout << "Ready to tag_sync" << std::endl;
           RN16_index = tag_sync(in, out_2, ninput_items[0]);  //find where the tag data bits start
           std::cout << "RN16_index: " << RN16_index << std::endl;
-	  for(int j=0 ; j < n_samples_TAG_BIT * 6 ; j++)
-		  std::cout << in[RN16_index+j] << " ";
+	  //for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
+		  //std::cout << in[RN16_index+j] << " ";
 	      
 	  FILE* file = fopen("tag_sync", "a");
-	  for(int j=0 ; j < n_samples_TAG_BIT * 6 ; j++)
+	  for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
 		  fprintf(file, "%f ", in[RN16_index+j].real());
 	  fclose(file);
 	      
