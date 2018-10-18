@@ -148,6 +148,9 @@ namespace gr {
         }
       }
       std::cout << std::endl << "max: " << max << std::endl;
+      	  FILE* file = fopen("max_corr", "a");
+	  fprintf(file, "%f ", max);
+	  fclose(file);
       h_est = sum;
       max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT - n_samples_TAG_BIT/2;
       if(max > 0.01f) 
