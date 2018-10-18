@@ -443,11 +443,11 @@ namespace gr {
 	      
 	  FILE* file = fopen("tag_sync", "a");
 	  fprintf(file, "preamble 6bits\n");
-	  for(int j=n_samples_TAG_BIT * 6 ; j > 0 ; j--)
-		  fprintf(file, "%f ", in[RN16_index-j].real());
-	  fprintf(file, "\n\nRN16 16bits + end of signal 1bit\n");
-	  for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
-		  fprintf(file, "%f ", in[RN16_index+j].real());
+	  for(int j=n_samples_TAG_BIT * 6 ; j > 0 ; j--){std::cout << RN16_index-j << " ";
+		  fprintf(file, "%f ", in[RN16_index-j].real());}
+	  fprintf(file, "\n\nRN16 16bits + end of signal 1bit\n");std::cout << std::endl << std::endl;
+	  for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++){std::cout << RN16_index+j << " ";
+		  fprintf(file, "%f ", in[RN16_index+j].real());}std::cout << std::endl << std::endl;
 	  fprintf(file, "\n");
 	  fclose(file);
 	      
