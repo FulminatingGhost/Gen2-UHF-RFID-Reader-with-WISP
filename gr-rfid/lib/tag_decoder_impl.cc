@@ -75,7 +75,45 @@ namespace gr {
         ninput_items_required[0] = noutput_items;
     }
 
-    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
+    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex* out, int size)
+    {
+      int max_index = 0;
+      float max = 0,corr;
+      gr_complex corr2;
+      float sample[12] = {1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1};
+      
+	for(int i=0 ; i < 1.5 * n_samples_TAG_BIT ; i++)
+	{
+		int cur = 0;
+		corr = 0;
+	
+		for(int j = 0 ; j < TAG_PREAMBLE_BITS * 2 ; j++)
+		{
+			for(int k = 0 ; k < n_samples_TAG_BIT / 2 ; k++)
+			{
+				float value = in[i+(cur++)].real();
+				value = (value > 0) ? value : 0;
+				corr += value * sample[j];
+			}
+		}
+	
+		if(corr > max)
+		{
+			max = corr;
+			max_index = i;
+		}
+	}
+
+       // Preamble ({1,1,-1,1,-1,-1,1,-1,-1,-1,1,1} 1 2 4 7 11 12)) 
+      h_est = (in[max_index] + in[ (int) (max_index + n_samples_TAG_BIT/2) ] + in[ (int) (max_index + 3*n_samples_TAG_BIT/2) ] + in[ (int) (max_index + 6*n_samples_TAG_BIT/2)] + in[(int) (max_index + 10*n_samples_TAG_BIT/2) ] + in[ (int) (max_index + 11*n_samples_TAG_BIT/2)])/std::complex<float>(6,0);  
+
+
+      // Shifted received waveform by n_samples_TAG_BIT/2
+      max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT + n_samples_TAG_BIT/2;
+      return max_index;  
+    }
+	  
+/*    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
     {
       int max_index = 0;
       float max = 0,corr;
@@ -114,7 +152,7 @@ namespace gr {
       else
         return -max_index;
 
-    }
+    }*/
 
 
     std::vector<float>  tag_decoder_impl::tag_detection_RN16(std::vector<gr_complex> & RN16_samples_complex, int RN16_index)
