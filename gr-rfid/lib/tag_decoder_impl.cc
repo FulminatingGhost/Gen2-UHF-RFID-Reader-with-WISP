@@ -471,7 +471,7 @@ namespace gr {
 
           GR_LOG_INFO(d_debug_logger, "RN16 DECODED");
 	    std::cout << "Now decoding RN16" << std::endl;
-            tag_bits = bit_decoding(RN16_samples_complex,RN16_BITS,0);
+            tag_bits = bit_decoding(RN16_samples_complex,RN16_BITS-1,0);
 	    std::cout << "RN16_BITS: ";
 		  
 
