@@ -485,6 +485,7 @@ namespace gr {
 		  std::cout << std::endl;
           produce(0,written);
           reader_state->gen2_logic_status = SEND_ACK;
+		  std::cout << "GOTO SEND_ACK" << std::endl;
         }
         else	// dummy(??)
         {  //out_2[RN16_index].imag() = 20;
