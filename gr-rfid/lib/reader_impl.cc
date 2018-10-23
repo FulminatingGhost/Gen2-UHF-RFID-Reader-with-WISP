@@ -293,8 +293,6 @@ namespace gr {
 
         case SEND_ACK:
           GR_LOG_INFO(d_debug_logger, "SEND ACK");
-          std::cout << "SEND_ACK" << std::endl;
-          std::cout << ninput_items[0] << " " << RN16_BITS << std::endl;
           if (ninput_items[0] == RN16_BITS - 1)
           {
             // Controls the other two blocks
