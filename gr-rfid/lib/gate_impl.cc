@@ -58,6 +58,7 @@ namespace gr {
 
       GR_LOG_INFO(d_logger, "T1 samples : " << n_samples_T1);
       GR_LOG_INFO(d_logger, "PW samples : " << n_samples_PW);
+      std::cout << "PW samples : " n_samples_PW << std::endl;
 
       GR_LOG_INFO(d_logger, "Samples of Tag bit : "<< n_samples_TAG_BIT);
       GR_LOG_INFO(d_logger, "Size of window : " << win_length);
