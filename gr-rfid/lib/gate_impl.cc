@@ -174,7 +174,7 @@ namespace gr {
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
             {
               FILE* file = fopen("gate", "a");
-              fprintf(file, "DETECTED:: n_samples=%d, n_samples_T1=%d, num_pulses=%d, NUM_PULSES_COMMAND=%d\n", n_samples, n_samples_T1, num_pulses, NUM_PULSES_COMMAND);
+              fprintf(file, "DETECTED:: n_samples=%d, n_samples_T1=%d, num_pulses=%f, NUM_PULSES_COMMAND=%d\n", n_samples, n_samples_T1, num_pulses, NUM_PULSES_COMMAND);
               fclose(file);
               
               GR_LOG_INFO(d_debug_logger, "READER COMMAND DETECTED");
