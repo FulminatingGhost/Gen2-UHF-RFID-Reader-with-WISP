@@ -154,7 +154,7 @@ namespace gr {
             {
               n_samples = 0;
               signal_state = NEG_EDGE;
-              fprintf(file, "num_pulses=%.0f\n", num_pulses);
+              fprintf(file, "num_pulses=%f\n", num_pulses);
             }
             // Negative edge -> Positive edge 
             else if (sample_ampl > sample_thresh && signal_state == NEG_EDGE)
@@ -164,7 +164,7 @@ namespace gr {
                 num_pulses++; 
               else
                 num_pulses = 0; 
-              fprintf(file, "num_pulses=%.0f, n_samples=%.0f, n_samples_PW=%.0f\n", num_pulses, n_samples, n_samples_PW);
+              fprintf(file, "num_pulses=%f, n_samples=%f, n_samples_PW=%f\n", num_pulses, n_samples, n_samples_PW);
               n_samples = 0;
             }
             
