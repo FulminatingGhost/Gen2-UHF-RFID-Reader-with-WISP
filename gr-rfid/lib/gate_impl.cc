@@ -144,6 +144,9 @@ namespace gr {
             dc_index = (dc_index + 1) % dc_length;
           
             n_samples++;
+            
+            FILE* file = fopen("gate", "a");
+            fprintf(file, "i=%d sample_ampl=%f sample_thresh=%f signal_state=%f ", i, sample_ampl, sample_thresh, signal_state);
 
             // Potitive edge -> Negative edge
             if( sample_ampl < sample_thresh && signal_state == POS_EDGE)
@@ -161,6 +164,9 @@ namespace gr {
                 num_pulses = 0; 
               n_samples = 0;
             }
+            
+            fprintf(file, "num_pulses=%d signal_state=%f\n", num_pulses, signal_state);
+            fclose(file);
 
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
             {
