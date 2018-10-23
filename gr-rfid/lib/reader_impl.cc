@@ -135,7 +135,6 @@ namespace gr {
 
       query_bits.resize(0);
       query_bits.insert(query_bits.end(), &QUERY_CODE[0], &QUERY_CODE[4]);
-      /*
       query_bits.push_back(DR);
       query_bits.insert(query_bits.end(), &M[0], &M[2]);
       query_bits.push_back(TREXT);
@@ -145,24 +144,6 @@ namespace gr {
     
       query_bits.insert(query_bits.end(), &Q_VALUE[FIXED_Q][0], &Q_VALUE[FIXED_Q][4]);
       crc_append(query_bits);
-      */
-      query_bits.push_back(0);
-      query_bits.push_back(0);
-      query_bits.push_back(0);
-      query_bits.push_back(0);
-      int TIME_STAMP[14] = {0,};
-      //int TIME_STAMP[14] = {0,0,0,0,0,0,1,0,0,0,0,1,1,1};
-      unsigned int mask = 1U;
-      for( int i=13; i>=0; i-- ){
-        TIME_STAMP[i] = (timestamp & mask) ? 1 : 0;
-        mask = mask << 1;
-      }
-
-      query_bits.insert(query_bits.end(), &TIME_STAMP[0], &TIME_STAMP[14]);
-      //query_bits.push_back(DR);
-
-      timestamp++;
-
     }
 
 
