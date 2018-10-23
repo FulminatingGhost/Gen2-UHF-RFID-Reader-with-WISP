@@ -98,7 +98,7 @@ namespace gr {
       float sample_ampl = 0;
       int written = 0;
 
-      std::cout << "PW samples : " << n_samples_PW << std::endl;
+      //std::cout << "PW samples : " << n_samples_PW << std::endl;
       
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
            reader_state-> reader_stats.tag_reads.size() > NUMBER_UNIQUE_TAGS) &&  
@@ -154,7 +154,7 @@ namespace gr {
             {
               n_samples = 0;
               signal_state = NEG_EDGE;
-              fprintf(file, "num_pulses=%d\n", num_pulses);
+              fprintf(file, "num_pulses=%.0f\n", num_pulses);
             }
             // Negative edge -> Positive edge 
             else if (sample_ampl > sample_thresh && signal_state == NEG_EDGE)
@@ -164,7 +164,7 @@ namespace gr {
                 num_pulses++; 
               else
                 num_pulses = 0; 
-              fprintf(file, "num_pulses=%d, n_samples=%d, n_samples_PW=%d\n", num_pulses, n_samples, n_samples_PW);
+              fprintf(file, "num_pulses=%.0f, n_samples=%.0f, n_samples_PW=%.0f\n", num_pulses, n_samples, n_samples_PW);
               n_samples = 0;
             }
             
