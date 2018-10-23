@@ -164,7 +164,7 @@ namespace gr {
                 num_pulses++; 
               else
                 num_pulses = 0; 
-              fprintf(file, "num_pulses=%f, n_samples=%f, n_samples_PW=%f\n", num_pulses, n_samples, n_samples_PW);
+              fprintf(file, "num_pulses=%f, n_samples=%d, n_samples_PW=%f\n", num_pulses, n_samples, n_samples_PW);
               n_samples = 0;
             }
             
