@@ -158,7 +158,7 @@ namespace gr {
             else if (sample_ampl > sample_thresh && signal_state == NEG_EDGE)
             {
               signal_state = POS_EDGE;
-              if (n_samples > n_samples_PW/3)
+              if (n_samples > n_samples_PW/5)
                 num_pulses++; 
               else
                 num_pulses = 0; 
