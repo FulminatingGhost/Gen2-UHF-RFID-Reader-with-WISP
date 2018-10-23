@@ -535,6 +535,13 @@ namespace gr {
 
         EPC_bits   = tag_detection_EPC(EPC_samples_complex,EPC_index);
         std::cout << "                                                                  EPC detect?" << std::endl;
+	for(int i=0 ; i<128 ; i++)
+	{
+		if(i%4==0) std::cout << " ";
+		if(i%16==0) std::cout << "\t";
+		if(i%32==0) std::cout << std::endl;
+		std::cout << EPC_bits[i];
+	}
         
         if (EPC_bits.size() == EPC_BITS - 1)
         {
