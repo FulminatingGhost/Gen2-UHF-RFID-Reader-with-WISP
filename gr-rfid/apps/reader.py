@@ -10,7 +10,7 @@ from gnuradio import qtgui
 import sys
 import rfid
 
-DEBUG = True
+DEBUG = False
 
 class reader_top_block(gr.top_block):
 
