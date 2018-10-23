@@ -160,11 +160,11 @@ namespace gr {
             else if (sample_ampl > sample_thresh && signal_state == NEG_EDGE)
             {
               signal_state = POS_EDGE;
-              if (n_samples > n_samples_PW/5)
+              if (n_samples > n_samples_PW/2)
                 num_pulses++; 
               else
                 num_pulses = 0; 
-              fprintf(file, "num_pulses=%f, n_samples=%d, n_samples_PW=%d\n", num_pulses, n_samples, n_samples_PW);
+              fprintf(file, "num_pulses=%f, n_samples=%d, n_samples_PW/2=%d\n", num_pulses, n_samples, n_samples_PW/2);
               n_samples = 0;
             }
             
@@ -173,6 +173,10 @@ namespace gr {
 
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
             {
+              FILE* file = fopen("gate", "a");
+              fprintf(file, "DETECTED:: n_samples=%d, n_samples_T1=%d, num_pulses=%d, NUM_PULSES_COMMAND=%d\n, n_samples, n_samples_T1, num_pulses, NUM_PULSES_COMMAND);
+              fclose(file);
+              
               GR_LOG_INFO(d_debug_logger, "READER COMMAND DETECTED");
 
               reader_state->gate_status = GATE_OPEN;
