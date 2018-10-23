@@ -58,7 +58,6 @@ namespace gr {
 
       GR_LOG_INFO(d_logger, "T1 samples : " << n_samples_T1);
       GR_LOG_INFO(d_logger, "PW samples : " << n_samples_PW);
-      std::cout << "PW samples : " << n_samples_PW << std::endl;
 
       GR_LOG_INFO(d_logger, "Samples of Tag bit : "<< n_samples_TAG_BIT);
       GR_LOG_INFO(d_logger, "Size of window : " << win_length);
@@ -99,6 +98,7 @@ namespace gr {
       float sample_ampl = 0;
       int written = 0;
 
+      std::cout << "PW samples : " << n_samples_PW << std::endl;
       
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
            reader_state-> reader_stats.tag_reads.size() > NUMBER_UNIQUE_TAGS) &&  
