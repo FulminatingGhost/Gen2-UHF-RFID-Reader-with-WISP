@@ -289,7 +289,6 @@ namespace gr {
           {  
             for(int j = (int)(RN16_index); j < std::min(ninput_items[0]+(int)RN16_index, (int)(RN16_index+(RN16_BITS+2)*n_samples_TAG_BIT)); j++) 
               RN16_samples_complex.push_back(in[j]);  //subtracting h_est(avg value) and save it in RN16_samples_complex
-	std::cout << "                                             " << number_of_points << std::endl;
             std::vector<float> tag_bits;
 
           GR_LOG_INFO(d_debug_logger, "RN16 DECODED");
@@ -341,7 +340,10 @@ namespace gr {
         
         
         EPC_index = tag_sync(in,out_2,ninput_items[0]);
-           
+        FILE* file = fopen("in", "a");
+	for(int j=0 ; j<ninput_items[0] ; j++)
+		fprintf(file, "%f ", in[j].real());
+	      fclose(file);
 	
         for (int j = 0; j < ninput_items[0]; j++ )
         {
