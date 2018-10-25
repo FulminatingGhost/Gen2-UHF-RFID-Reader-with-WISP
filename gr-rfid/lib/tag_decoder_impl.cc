@@ -74,45 +74,6 @@ namespace gr {
     {
         ninput_items_required[0] = noutput_items;
     }
-
-	  /*
-    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex* out, int size)
-    {
-      int max_index = 0;
-      float max = 0,corr;
-      gr_complex corr2;
-      float sample[12] = {1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1};
-      
-	for(int i=0 ; i < 1.5 * n_samples_TAG_BIT ; i++)
-	{
-		int cur = 0;
-		corr = 0;
-	
-		for(int j = 0 ; j < TAG_PREAMBLE_BITS * 2 ; j++)
-		{
-			for(int k = 0 ; k < n_samples_TAG_BIT / 2 ; k++)
-			{
-				float value = in[i+(cur++)].real();
-				value = (value > 0) ? value : 0;
-				corr += value * sample[j];
-			}
-		}
-	
-		if(corr > max)
-		{
-			max = corr;
-			max_index = i;
-		}
-	}
-
-       // Preamble ({1,1,-1,1,-1,-1,1,-1,-1,-1,1,1} 1 2 4 7 11 12)) 
-      h_est = (in[max_index] + in[ (int) (max_index + n_samples_TAG_BIT/2) ] + in[ (int) (max_index + 3*n_samples_TAG_BIT/2) ] + in[ (int) (max_index + 6*n_samples_TAG_BIT/2)] + in[(int) (max_index + 10*n_samples_TAG_BIT/2) ] + in[ (int) (max_index + 11*n_samples_TAG_BIT/2)])/std::complex<float>(6,0);  
-
-
-      // Shifted received waveform by n_samples_TAG_BIT/2
-      max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT + n_samples_TAG_BIT/2;
-      return max_index;  
-    }*/
 	  
     int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
     {
@@ -159,132 +120,6 @@ namespace gr {
       else
         return -max_index;
 
-    }
-
-
-    std::vector<float>  tag_decoder_impl::tag_detection_RN16(std::vector<gr_complex> & RN16_samples_complex, int RN16_index)
-    {
-      // detection + differential decoder (since Tag uses FM0)
-      std::vector<float> tag_bits,dist;
-      float result;
-      int prev = 1,index_T=0;
-      float max = 0, corr;
-      int max_bit, cur=0;
-	int idx = RN16_index + n_samples_TAG_BIT / 2 ;
-      
-      /*
-	// #1 original code : sampling 2 points per 1 bit
-      for (int j = 0; j < RN16_samples_complex.size()/2 ; j ++ )
-      {
-        result = std::real( (RN16_samples_complex[2*j] - RN16_samples_complex[2*j+1])*std::conj(h_est)); 
-  
-        if (result>0){
-          if (prev == 1)
-           { tag_bits.push_back(0); out_2[idx].imag() = -1; }
-          else
-           { tag_bits.push_back(1); out_2[idx].imag() = 1;}
-          prev = 1;      
-        }
-        else
-        { 
-          if (prev == -1)
-           { tag_bits.push_back(0); out_2[idx].imag() = -1; }
-          else
-           { tag_bits.push_back(1); out_2[idx].imag() = 1;}
-          prev = -1;    
-        }
-	idx += n_samples_TAG_BIT;
-      }
-      	*/
-	int samples[5][4] = {{-1, 1, -1, 1}, {-1, 1, 1, -1}, {1, -1, 1, -1}, {1, -1, -1, 1}, {-1, 1, -1, 1}};
-      	
-      	// #2 modified code : sampling all bits
-      	for(int i=0 ; i < RN16_BITS - 1 ; i++)
-      	{
-		max = 0;
-
-		for(int j = 0 ; j < 4 ; j++)
-		{
-			int k = 0;
-			corr = 0;
-			
-			for(; k < n_samples_TAG_BIT / 2 ; k++)
-				corr += RN16_samples_complex[cur+k].real() * samples[j][0];
-			for(; k < n_samples_TAG_BIT ; k++)
-				corr += RN16_samples_complex[cur+k].real() * samples[j][1];
-			for(; k < n_samples_TAG_BIT * 1.5 ; k++)
-				corr += RN16_samples_complex[cur+k].real() * samples[j][2];
-			for(; k < n_samples_TAG_BIT * 2 ; k++)
-				corr += RN16_samples_complex[cur+k].real() * samples[j][3];
-			
-			if(corr > max)
-			{
-				max = corr;
-				max_bit = samples[4][j];
-			}
-		}
-		
-		if(max_bit == -1) max_bit = 0;
-		tag_bits.push_back(max_bit);
-		//out_2[idx].imag() = max_bit;
-                std::cout << max_bit;
-		
-		cur += n_samples_TAG_BIT;
-		idx += n_samples_TAG_BIT;
-      	}
-      	
-      return tag_bits;
-    }
-
-
-    std::vector<float>  tag_decoder_impl::tag_detection_EPC(std::vector<gr_complex> & EPC_samples_complex, int index)
-    {
-      std::vector<float> tag_bits,dist;
-      float result=0;
-      int prev = 1;
-      
-      int number_steps = 20;
-      float min_val = n_samples_TAG_BIT/2.0 -  n_samples_TAG_BIT/2.0/100, max_val = n_samples_TAG_BIT/2.0 +  n_samples_TAG_BIT/2.0/100;
-
-      std::vector<float> energy;
-
-      energy.resize(number_steps);
-      for (int t = 0; t <number_steps; t++)
-      {  
-        for (int i =0; i <256; i++)
-        {
-          energy[t]+= reader_state->magn_squared_samples[(int) (i * (min_val + t*(max_val-min_val)/(number_steps-1)) + index)];
-        }
-
-      }
-      int index_T = std::distance(energy.begin(), std::max_element(energy.begin(), energy.end()));
-      float T =  min_val + index_T*(max_val-min_val)/(number_steps-1);
-
-      // T estimated
-      T_global = T;
-  
-      for (int j = 0; j < 128 ; j ++ )
-      {
-        result = std::real((EPC_samples_complex[ (int) (j*(2*T) + index) ] - EPC_samples_complex[ (int) (j*2*T + T + index) ])*std::conj(h_est) ); 
-
-        
-         if (result>0){
-          if (prev == 1)
-            tag_bits.push_back(0);
-          else
-            tag_bits.push_back(1);      
-          prev = 1;      
-        }
-        else
-        { 
-          if (prev == -1)
-            tag_bits.push_back(0);
-          else
-            tag_bits.push_back(1);      
-          prev = -1;    
-        }
-      }
-      return tag_bits;
     }
 
 #define SHIFT_SIZE 3
@@ -441,18 +276,6 @@ namespace gr {
 	  //for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
 		  //std::cout << in[RN16_index+j] << " ";
 	      
-	  FILE* file = fopen("tag_sync", "a");
-	  fprintf(file, "all bits\n");
-	  for(int j=0 ; j<ninput_items[0] ; j++)
-		  fprintf(file, "%f ", in[j].real());
-	  fprintf(file, "\n\npreamble 6bits\n");
-	  for(int j=n_samples_TAG_BIT * 6 ; j > 0 ; j--){std::cout << RN16_index-j << " ";
-		  fprintf(file, "%f ", in[RN16_index-j].real());}
-	  fprintf(file, "\n\nRN16 16bits + end of signal 1bit\n");std::cout << std::endl << std::endl;
-	  for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++){std::cout << RN16_index+j << " ";
-		  fprintf(file, "%f ", in[RN16_index+j].real());}std::cout << std::endl << std::endl;
-	  fprintf(file, "\n\n");
-	  fclose(file);
 	      
           std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
 
