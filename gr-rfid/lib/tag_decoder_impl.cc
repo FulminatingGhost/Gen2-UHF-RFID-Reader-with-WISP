@@ -275,7 +275,9 @@ namespace gr {
           std::cout << "RN16_index: " << RN16_index << std::endl;
 	  //for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
 		  //std::cout << in[RN16_index+j] << " ";
-	      
+	  for(int j=-(n_samples_TAG_BIT*2) ; j<n_samples_TAG_BIT*4 ; j++)
+	      std::cout << in[RN16_index+j] << " ";
+	   std::cout << std::endl;
 	      
           std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
 
