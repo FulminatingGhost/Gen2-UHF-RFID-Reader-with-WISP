@@ -349,7 +349,7 @@ namespace gr {
         }
 	      FILE* file = fopen("tag_sync", "a");      
 	      for(int j=0 ; j<EPC_BITS*n_samples_TAG_BIT ; j++)
-		      fprintf(file, "%f ", in[EPC_index+j]);
+		      fprintf(file, "%f ", in[EPC_index+j].real());
        fclose(file);
         
         for (int j = 0; j < ninput_items[0] ; j ++ )
