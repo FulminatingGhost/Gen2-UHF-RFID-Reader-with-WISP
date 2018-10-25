@@ -347,9 +347,9 @@ namespace gr {
 		fprintf(file, "%f ", in[j].real());
 	      fclose(file);
 		      std::cout << "EPC_index: " << EPC_index << std::endl;
-        for (int j = 0; j < ninput_items[0]; j++ )
+        for (int j = 0 ; j < (EPC_BITS + 2)*n_samples_TAG_BIT ; j++ )
         {
-          EPC_samples_complex.push_back(in[j]);
+          EPC_samples_complex.push_back(in[EPC_index+j]);
         }
 	    file = fopen("tag_sync", "a");      
 	      for(int j=0 ; j<EPC_BITS*n_samples_TAG_BIT ; j++)
