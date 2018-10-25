@@ -344,7 +344,7 @@ namespace gr {
 	for(int j=0 ; j<ninput_items[0] ; j++)
 		fprintf(file, "%f ", in[j].real());
 	      fclose(file);
-	
+		      std::cout << "EPC_index: " << EPC_index << std::endl;
         for (int j = 0; j < ninput_items[0]; j++ )
         {
           EPC_samples_complex.push_back(in[j]);
