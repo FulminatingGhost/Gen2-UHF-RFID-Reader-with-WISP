@@ -273,11 +273,6 @@ namespace gr {
           std::cout << "Ready to tag_sync" << std::endl;
           RN16_index = tag_sync(in, out_2, ninput_items[0]);  //find where the tag data bits start
           std::cout << "RN16_index: " << RN16_index << std::endl;
-	  //for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
-		  //std::cout << in[RN16_index+j] << " ";
-	  for(int j=-(n_samples_TAG_BIT*2) ; j<n_samples_TAG_BIT*4 ; j++)
-	      std::cout << in[RN16_index+j].real() << " ";
-	   std::cout << std::endl;
 	      
           std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
 
