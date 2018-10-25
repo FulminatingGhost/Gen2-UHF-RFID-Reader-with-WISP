@@ -276,7 +276,7 @@ namespace gr {
 	  //for(int j=0 ; j < n_samples_TAG_BIT * 17 ; j++)
 		  //std::cout << in[RN16_index+j] << " ";
 	  for(int j=-(n_samples_TAG_BIT*2) ; j<n_samples_TAG_BIT*4 ; j++)
-	      std::cout << in[RN16_index+j] << " ";
+	      std::cout << in[RN16_index+j].real() << " ";
 	   std::cout << std::endl;
 	      
           std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
