@@ -487,8 +487,8 @@ namespace gr {
           reader_state->gen2_logic_status = SEND_ACK;
 		  std::cout << "GOTO SEND_ACK" << std::endl;
         }
-        else	// dummy(??)
-        {  //out_2[RN16_index].imag() = 20;
+        else	// RN16_index <= 0.0f
+        {
           std::cout << "                                              DECODING FAIL" << std::endl;
           reader_state->reader_stats.cur_slot_number++;
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
@@ -533,7 +533,8 @@ namespace gr {
         produce(1,written_sync);
         
 
-        EPC_bits   = tag_detection_EPC(EPC_samples_complex,EPC_index);
+	EPC_bits = bit_decoding(EPC_samples_complex,EPC_BITS-1,0);
+        //EPC_bits   = tag_detection_EPC(EPC_samples_complex,EPC_index);
         std::cout << "                                                                  EPC detect?" << std::endl;
 	for(int i=0 ; i<128 ; i++)
 	{
