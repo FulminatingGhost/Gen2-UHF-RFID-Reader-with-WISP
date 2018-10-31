@@ -101,7 +101,7 @@ namespace gr
       }
       h_est = sum;
       
-      preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_preamble_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
+      preamble_fp = fopen(("decode_data/preamble_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "a");
       for(int i=0 ; i<7*n_samples_TAG_BIT ; i++)
         fprintf(preamble_fp, "%f ", in[max_index+i].real());
       fclose(preamble_fp);
