@@ -107,7 +107,7 @@ namespace gr
       return -max_index;
     }
     
-    #define SHIFT_SIZE 3
+    #define SHIFT_SIZE 0
     std::vector<float> tag_decoder_impl::bit_decoding(
       std::vector<gr_complex> &samples_complex,
       int                     n_expected_bit,
