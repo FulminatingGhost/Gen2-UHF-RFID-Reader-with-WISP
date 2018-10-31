@@ -123,7 +123,12 @@ namespace gr
       };
       int start, end;
       int shift_cum=0;
-        
+      
+      preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_raw_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
+      for(int i=0 ; i<(n_expected_bit+1)*n_samples_TAG_BIT ; i++)
+        fprintf(preamble_fp, "%f ", samples_complex[i]);
+      fclose(preamble_fp);
+      
       preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
       if(!preamble_fp) std::cout << "(tag_decoding_impl.cpp::bit_decoding)File open error!" << std::endl;
         
