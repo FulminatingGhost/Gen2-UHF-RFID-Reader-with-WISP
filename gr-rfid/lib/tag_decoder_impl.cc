@@ -124,7 +124,7 @@ namespace gr
       int start, end;
       int shift_cum=0;
         
-      preamble_fp = fopen(("decode_data/"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
+      preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
       if(!preamble_fp) std::cout << "(tag_decoding_impl.cpp::bit_decoding)File open error!" << std::endl;
         
       //decode bit every round
