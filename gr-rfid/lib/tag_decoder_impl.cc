@@ -100,18 +100,18 @@ namespace gr
         }
       }
       h_est = sum;
-      max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT; //- n_samples_TAG_BIT/2;
+      max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT - n_samples_TAG_BIT/2;
       if(max > 0.01f)
       return max_index;
       else
       return -max_index;
     }
     
-    #define SHIFT_SIZE 0
+    #define SHIFT_SIZE 3
     std::vector<float> tag_decoder_impl::bit_decoding(
       std::vector<gr_complex> &samples_complex,
       int                     n_expected_bit,
-      int                     index)
+      int                     index)  // index not using.. need to delete
     {
       std::vector<float> tag_bits;
         
