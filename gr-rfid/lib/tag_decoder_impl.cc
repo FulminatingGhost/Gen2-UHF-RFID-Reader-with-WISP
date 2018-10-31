@@ -100,6 +100,12 @@ namespace gr
         }
       }
       h_est = sum;
+      
+      preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_preamble_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
+      for(int i=0 ; i<7*n_samples_TAG_BIT ; i++)
+        fprintf(preamble_fp, "%f ", in[max_index+i].real());
+      fclose(preamble_fp);
+      
       max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT - n_samples_TAG_BIT/2;
       if(max > 0.01f)
       return max_index;
