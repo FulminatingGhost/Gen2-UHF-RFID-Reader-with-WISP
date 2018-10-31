@@ -109,17 +109,17 @@ namespace gr
     
     #define SHIFT_SIZE 3
     std::vector<float> tag_decoder_impl::bit_decoding(
-      std::vector<gr_complex> &samples_complex,
+      std::vector<gr_complex> &samples_complex, // samples_complex must start half bits less than real signal start point
       int                     n_expected_bit,
       int                     index)  // index not using.. need to delete
     {
       std::vector<float> tag_bits;
         
-      const float masks[4][4] = {
-        {-1, 1, -1, 1},
-        {1, -1, 1, -1},
-        {1, -1, -1, 1},
-        {-1, 1, 1, -1}
+      const float masks[4][4] = { // first, last elements are extra bits. second, third elements are real signal.
+        {-1, 1, -1, 1}, // 0
+        {1, -1, 1, -1}, // 0
+        {1, -1, -1, 1}, // 1
+        {-1, 1, 1, -1}  // 1
       };
       int start, end;
       int shift_cum=0;
@@ -129,7 +129,7 @@ namespace gr
         
       //decode bit every round
       for (int i = 0; i < n_expected_bit; i++) {
-        float corr[SHIFT_SIZE*2+1][4] = {0.0f,};
+        float corr[SHIFT_SIZE*2+1][4] = {0.0f,};  // store correlation scores for each shift
         //std::cout << i << std::endl;
         fprintf(preamble_fp,"%d ",i);
         start = (int)(i*n_samples_TAG_BIT)+shift_cum;
@@ -137,33 +137,35 @@ namespace gr
           
         float average_amp = 0;
         
+        // calculate average_amp
         for(int j = start;j < end; j++)
-        average_amp += samples_complex[j].real();
-        
+          average_amp += samples_complex[j].real();
         average_amp = average_amp/(int)(n_samples_TAG_BIT * 2);
           
-        //std::cout << "average_amp: " << average_amp << std::endl;
         //calculating correlation values
-        for (int j = 0; j < 4; j++) {
-          for (int k = start+SHIFT_SIZE; k < end-SHIFT_SIZE; k++) {
+        for (int j = 0; j < 4; j++) { // compare with 4 masks
+          for (int k = start+SHIFT_SIZE; k < end-SHIFT_SIZE; k++) { // cut SHIFT_SIZE samples at each boundary
             int devi = 0;
             int position = k-start;
               
+            // get location
             if(position<(n_samples_TAG_BIT*0.5))  //first quarter
-            devi = 0;
+              devi = 0;
             else if(position<(n_samples_TAG_BIT)) //second quarter
-            devi = 1;
+              devi = 1;
             else if(position<(n_samples_TAG_BIT*1.5)) //third quarter
-            devi = 2;
+              devi = 2;
             else  //last quarter
-            devi = 3;
+              devi = 3;
+            
             if(j==0){
               fprintf(preamble_fp, ", ");
               fprintf(preamble_fp, "%f", samples_complex[k].real());
               //std::cout << samples_complex[k].real() << std::endl;
             }
-            for(int l=-SHIFT_SIZE;l<=SHIFT_SIZE;l++){
+            for(int l=-SHIFT_SIZE;l<=SHIFT_SIZE;l++){ // iterate shift cases
               corr[l+SHIFT_SIZE][j] += masks[j][devi] * (std::real(samples_complex[k+l])-average_amp);  //calculate
+              // 
             }
           }
         }
@@ -181,7 +183,10 @@ namespace gr
             }else if(corr[j][i] > corr[j][secondidx[j]])
             secondidx[j] = i;
           }
-        }
+        } // why get secondidx??
+        // now maxidx[j] stores 0~3 value which indicates max_corr mask
+        // maxidx 0, 1 --> value 0
+        // maxidx 2, 3 --> value 1
           
         for(int i = 0;i<=SHIFT_SIZE*2;i++){
           fprintf(preamble_fp,", %d",maxidx[i]);
