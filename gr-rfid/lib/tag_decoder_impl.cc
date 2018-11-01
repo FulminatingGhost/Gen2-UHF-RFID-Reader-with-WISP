@@ -150,7 +150,7 @@ namespace gr
     // index: start point of "tag data", do not decrease half bit!
     {
       float max_max_corr = 0.0f;
-      int max_max_index;
+      int max_max_index = -1;
 
       for(int k=0 ; k<2 ; k++)
       {
@@ -187,7 +187,7 @@ namespace gr
       if(mask_level == -1) mask_level = 0;  // convert for indexing
 
       float max_corr = 0.0f;
-      int max_index;
+      int max_index = -1;
 
       for(int i=0 ; i<2 ; i++)
       {
@@ -259,7 +259,7 @@ namespace gr
 
         if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
         {
-          std::cout << "\t\t[tag_detection] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=", max_index;
+          std::cout << "\t\t[tag_detection] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
 
           if(mask_level) std::cout << " (high start)" << std::endl;
           else std::cout << " (low start)" << std::endl;
