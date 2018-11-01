@@ -259,10 +259,10 @@ namespace gr
         decoded_bits.push_back(max_index);
         shift += curr_shift;
 
-        fprintf("%d\n", i);
+        fprintf(file, "%d\n", i);
         for(int j=-(n_samples_TAG_BIT*0.5) ; j<1.5*n_samples_TAG_BIT ; j++)
-          fprintf("%f ", in[idx+j].real());
-        fprintf("\n\n");
+          fprintf(file, "%f ", in[idx+j].real());
+        fprintf(file, "\n\n");
 
         if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
         {
