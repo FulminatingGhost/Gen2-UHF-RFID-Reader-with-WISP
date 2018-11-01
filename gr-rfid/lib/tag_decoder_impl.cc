@@ -32,7 +32,7 @@
 #define DEBUG_MESSAGE_TAG_DECODER 1
 #define DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT 1
 #define DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION 1
-#define SHIFT_SIZE 1  // used in tag_detection
+#define SHIFT_SIZE 0  // used in tag_detection
 
 namespace gr
 {
@@ -490,7 +490,7 @@ namespace gr
 
           // go to next state
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
-
+          while(1) ;  //temp for debugging [!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!REMOVE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!]
           reader_state->gen2_logic_status = SEND_ACK;
         }
 
