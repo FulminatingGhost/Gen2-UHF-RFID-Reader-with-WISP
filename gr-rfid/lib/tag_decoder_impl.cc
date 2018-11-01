@@ -29,6 +29,8 @@
 #include <sys/time.h>
 #include "tag_decoder_impl.h"
 
+#define DEBUG_MESSAGE_TAG_DECODER 1
+
 namespace gr
 {
   namespace rfid
@@ -39,11 +41,11 @@ namespace gr
       std::vector<int> output_sizes;
       output_sizes.push_back(sizeof(float));
       output_sizes.push_back(sizeof(gr_complex));
-      
+
       return gnuradio::get_initial_sptr
       (new tag_decoder_impl(sample_rate,output_sizes));
     }
-    
+
     /*
     * The private constructor
     */
@@ -54,71 +56,93 @@ namespace gr
     s_rate(sample_rate)
     {
       char_bits = (char *) malloc( sizeof(char) * 128);
-      
+
       n_samples_TAG_BIT = TAG_BIT_D * s_rate / pow(10,6);
       GR_LOG_INFO(d_logger, "Number of samples of Tag bit : "<< n_samples_TAG_BIT);
     }
-    
+
     /*
     * Our virtual destructor.
     */
     tag_decoder_impl::~tag_decoder_impl()
     {
-      
+
     }
-    
+
     void
     tag_decoder_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
       ninput_items_required[0] = noutput_items;
     }
-    
-    int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
+
+    int tag_decoder_impl::tag_sync(const gr_complex* in, int size) // size: ninput_items[0]
     {
-      float average_amp = 0.0f;
+      // This method searches the preamble and returns the start index of the tag data.
+      // If the correlation value exceeds the threshold, it returns the start index of the tag data.
+      // Else, it returns -1.
+      // Threshold is an experimental value, so you might change this value within your environment.
+
+      win_size = n_samples_TAG_BIT * TAG_PREAMBLE_BITS;
+      float threshold = 0.01f;  // threshold verifing correlation value
+
+      float max_corr = 0.0f;
       int max_index = 0;
-      float max = 0,corr;
-      gr_complex corr2;
-      
-      
-      
-      
-      // calculate average_amp
-      for(int i=0 ; i<size ; i++)
-        average_amp += in[i].real();
-      average_amp /= size;
-      
-      for (int i=0; i < 6 * n_samples_TAG_BIT ; i++) {
-        //for (int i=0; i < n_samples_TAG_BIT * (TAG_PREAMBLE_BITS+RN16_BITS) ; i++) {
-        corr2 = gr_complex(0, 0);
-        corr = 0;
-        for (int j = 0; j < 2*TAG_PREAMBLE_BITS; j++) {
-          for (int k = 0; k < n_samples_TAG_BIT/2.0; k++) {
-            gr_complex sample = in[ (int) (i+j*n_samples_TAG_BIT/2.0 + k) ] - sum;
-            corr2 = corr2 + sample * gr_complex(TAG_PREAMBLE[j], 0);
+
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder::tag_sync] Searching preamble.." << std::endl;
+
+      // compare all samples with sliding
+      for(int i=0 ; i<size-win_size ; i++)  // i: start point
+      {
+        // calculate average_amp (threshold)
+        float average_amp = 0.0f;
+        for(int j=0 ; j<win_size ; j++)
+          average_amp += in[i].real();
+        average_amp /= win_size;
+
+        // calculate correlation value
+        float corr_candidates[2] = {0.0f};
+        for(int j=0 ; j<2*TAG_PREAMBLE_BITS ; j++)  // j: half_bit index of TAG_PREAMBLE
+        {
+          for(int k=0 ; k<(n_samples_TAG_BIT/2.0) ; k++)
+          {
+            for(int m=0 ; m<2 ; m++)  // m: index of TAG_PREAMBLE type
+                corr_candidates[m] += TAG_PREAMBLE[m][j] * (in[i + j*(n_samples_TAG_BIT/2.0) + k].real() - average_amp);
           }
         }
-        corr = corr2.real();
-        if (corr > max)
+
+        // get max correlation value for ith start point
+        float corr = 0.0f
+        for(int j=0 ; j<2 ; j++)
+          if(corr_candidates[j] > corr) corr = corr_candidates[j];
+
+        // compare with current max correlation value
+        if(corr > max_corr)
         {
-          max = corr;
+          max_corr = corr;
           max_index = i;
         }
       }
-      h_est = sum;
-      
-      preamble_fp = fopen(("decode_data/preamble_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "a");
-      for(int i=0 ; i<7*n_samples_TAG_BIT ; i++)
-        fprintf(preamble_fp, "%f ", in[max_index+i].real());
-      fclose(preamble_fp);
-      
-      max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT - n_samples_TAG_BIT/2;
-      if(max > 0.01f) // threshold
-      return max_index;
+
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_sync] max_corr= " << max_corr << "\tmax_index= " << max_index << std::endl;
+
+      // check if correlation value exceeds threshold
+      if(max_corr > threshold)
+      {
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_sync] Preamble successfully detected.." << std::endl;
+        return max_index + win_size;
+      }
       else
-      return -max_index;
+      {
+        if(DEBUG_MESSAGE_TAG_DECODER)
+        {
+          std::cout << "\t[tag_sync] Preamble detection fail.." << std::endl;
+          std::cout << "\t\tCheck whether if the threshold value is too high!" << std::endl;
+          std::cout << "\t\tCurrent threshold= " << threshold << std::endl;
+        }
+        return -1;
+      }
     }
-    
+
     #define SHIFT_SIZE 3
     std::vector<float> tag_decoder_impl::bit_decoding(
       std::vector<gr_complex> &samples_complex, // samples_complex must start half bits less than real signal start point
@@ -126,7 +150,7 @@ namespace gr
       int                     index)  // index not using.. need to delete
     {
       std::vector<float> tag_bits;
-        
+
       const float masks[4][4] = { // first, last elements are extra bits. second, third elements are real signal.
         {-1, 1, -1, 1}, // 0
         {1, -1, 1, -1}, // 0
@@ -135,15 +159,15 @@ namespace gr
       };
       int start, end;
       int shift_cum=0;
-      
+
       preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_raw_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
       for(int i=0 ; i<(n_expected_bit+1)*n_samples_TAG_BIT ; i++)
         fprintf(preamble_fp, "%f ", samples_complex[i].real());
       fclose(preamble_fp);
-      
+
       preamble_fp = fopen(("decode_data/"+std::to_string(n_expected_bit)+"_"+std::to_string(reader_state->reader_stats.cur_inventory_round-1)).c_str(), "w");
       if(!preamble_fp) std::cout << "(tag_decoding_impl.cpp::bit_decoding)File open error!" << std::endl;
-        
+
       //decode bit every round
       for (int i = 0; i < n_expected_bit; i++) {
         float corr[SHIFT_SIZE*2+1][4] = {0.0f,};  // store correlation scores for each shift
@@ -151,20 +175,20 @@ namespace gr
         fprintf(preamble_fp,"%d ",i);
         start = (int)(i*n_samples_TAG_BIT)+shift_cum;
         end = start + (int)(2*n_samples_TAG_BIT);
-          
+
         float average_amp = 0;
-        
+
         // calculate average_amp
         for(int j = start;j < end; j++)
           average_amp += samples_complex[j].real();
         average_amp = average_amp/(int)(n_samples_TAG_BIT * 2);
-          
+
         //calculating correlation values
         for (int j = 0; j < 4; j++) { // compare with 4 masks
           for (int k = start+SHIFT_SIZE; k < end-SHIFT_SIZE; k++) { // cut SHIFT_SIZE samples at each boundary
             int devi = 0;
             int position = k-start;
-              
+
             // get location
             if(position<(n_samples_TAG_BIT*0.5))  //first quarter
               devi = 0;
@@ -174,7 +198,7 @@ namespace gr
               devi = 2;
             else  //last quarter
               devi = 3;
-            
+
             if(j==0){
               fprintf(preamble_fp, ", ");
               fprintf(preamble_fp, "%f", samples_complex[k].real());
@@ -182,15 +206,15 @@ namespace gr
             }
             for(int l=-SHIFT_SIZE;l<=SHIFT_SIZE;l++){ // iterate shift cases
               corr[l+SHIFT_SIZE][j] += masks[j][devi] * (std::real(samples_complex[k+l])-average_amp);  //calculate
-              // 
+              //
             }
           }
         }
         fprintf(preamble_fp, "\n%d ",i);
-          
+
         int maxidx[SHIFT_SIZE*2+1] = {0,};
         int secondidx[SHIFT_SIZE*2+1] = {0,};
-          
+
         //find the most maximum correlation values
         for (int i = 0; i < 4; i++) {
           for(int j=0; j<=SHIFT_SIZE*2; j++){
@@ -204,7 +228,7 @@ namespace gr
         // now maxidx[j] stores 0~3 value which indicates max_corr mask
         // maxidx 0, 1 --> value 0
         // maxidx 2, 3 --> value 1
-          
+
         for(int i = 0;i<=SHIFT_SIZE*2;i++){
           fprintf(preamble_fp,", %d",maxidx[i]);
         }
@@ -212,22 +236,22 @@ namespace gr
         for(int i = 0;i<=SHIFT_SIZE*2;i++){
           fprintf(preamble_fp,", %f",corr[i][maxidx[i]]);
         }
-        
+
         int shift = 0;  //actual value is shift-2
         float diff[SHIFT_SIZE*2+1];
-          
-          
+
+
         //find out whether shift or not
         for (int i = 0; i<SHIFT_SIZE*2+1;i++){
           if(corr[i][maxidx[i]] > corr[shift][maxidx[shift]])
           shift = i;
         }
         fprintf(preamble_fp, "\n");
-          
+
         //std::cout<<shift-SHIFT_SIZE<<" ";
-          
+
         shift_cum += (shift-SHIFT_SIZE);
-          
+
         //based on maximum correlation value, decode the tag bits
         if (maxidx[shift] <= 1){
           tag_bits.push_back(0);
@@ -236,13 +260,13 @@ namespace gr
           tag_bits.push_back(1);
         }
       }
-        
+
       fclose(preamble_fp);
       //std::cout<<std::endl<<"shift cum : "<<shift_cum<<std::endl;
-    
+
       return tag_bits;
     }
-      
+
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
@@ -252,47 +276,47 @@ namespace gr
       const gr_complex *in = (const  gr_complex *) input_items[0];
       float *out = (float *) output_items[0];
       gr_complex *out_2 = (gr_complex *) output_items[1]; // for debugging
-        
+
       int written_sync =0;
       int written = 0, consumed = 0;
       int RN16_index , EPC_index;
-          
+
       std::vector<float> RN16_samples_real;
       std::vector<float> EPC_samples_real;
-          
+
       std::vector<gr_complex> RN16_samples_complex;
       std::vector<gr_complex> EPC_samples_complex;
-          
+
       std::vector<float> RN16_bits;
       int number_of_half_bits = 0;
       int number_of_points = 0;
-          
+
       std::vector<float> EPC_bits;
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if (reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
         std::cout << "Ready to tag_sync" << std::endl;
-        RN16_index = tag_sync(in, out_2, ninput_items[0]);  //find where the tag data bits start
+        RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
         std::cout << "RN16_index: " << RN16_index << std::endl;
-            
+
         std::cout << "ninput_items[0]: " << ninput_items[0] << std::endl;
-            
+
         for(int j=0 ; j<ninput_items[0] ; j++)
         written_sync++;
         produce(1, written_sync);
-            
+
         // RN16 bits are passed to the next block for the creation of ACK message
         if ((RN16_index > 0.0f))//&&(ninput_items[0]>6000))
         {
           for(int j = (int)(RN16_index); j < std::min(ninput_items[0]+(int)RN16_index, (int)(RN16_index+(RN16_BITS+2)*n_samples_TAG_BIT)); j++)
           RN16_samples_complex.push_back(in[j]);  //subtracting h_est(avg value) and save it in RN16_samples_complex
           std::vector<float> tag_bits;
-              
+
           GR_LOG_INFO(d_debug_logger, "RN16 DECODED");
           std::cout << "Now decoding RN16" << std::endl;
           tag_bits = bit_decoding(RN16_samples_complex,RN16_BITS-1,0);
           std::cout << "RN16_BITS: ";
-              
+
           for(int bit=0; bit<tag_bits.size(); bit++)
           {
             out[written] =  tag_bits[bit];
@@ -312,9 +336,9 @@ namespace gr
           {
             reader_state->reader_stats.cur_slot_number = 1;
             reader_state->reader_stats.unique_tags_round.push_back(reader_state->reader_stats.tag_reads.size());
-              
+
             reader_state->reader_stats.cur_inventory_round += 1;
-                
+
             //if (P_DOWN == true)
             //  reader_state->gen2_logic_status = POWER_DOWN;
             //else
@@ -329,24 +353,24 @@ namespace gr
       }
       else if (reader_state->decoder_status == DECODER_DECODE_EPC && ninput_items[0] >= reader_state->n_samples_to_ungate )
       {
-            
+
         //After EPC message send a query rep or query
         reader_state->reader_stats.cur_slot_number++;
-          
-        EPC_index = tag_sync(in,out_2,ninput_items[0]);
+
+        EPC_index = tag_sync(in,ninput_items[0]);
         for (int j = 0 ; j < (EPC_BITS + 2)*n_samples_TAG_BIT ; j++ )
         {
           EPC_samples_complex.push_back(in[EPC_index+j]);
         }
-            
+
         for (int j = 0; j < ninput_items[0] ; j ++ )
         {
           //out_2[written_sync].real() = in[j].real();
           written_sync ++;
         }
         produce(1,written_sync);
-            
-            
+
+
         EPC_bits = bit_decoding(EPC_samples_complex,EPC_BITS-1,0);
         //EPC_bits   = tag_detection_EPC(EPC_samples_complex,EPC_index);
         std::cout << "                                                                  EPC detect?" << std::endl;
@@ -357,7 +381,7 @@ namespace gr
           if(i%32==0) std::cout << std::endl;
           std::cout << EPC_bits[i];
         }
-            
+
         if (EPC_bits.size() == EPC_BITS - 1)
         {
           std::cout << "                                                                EPC detected!!!!!!!!" << std::endl;
@@ -375,7 +399,7 @@ namespace gr
             {
               reader_state->reader_stats.cur_slot_number = 1;
               reader_state->reader_stats.unique_tags_round.push_back(reader_state->reader_stats.tag_reads.size());
-              
+
               reader_state->reader_stats.cur_inventory_round+=1;
               //if (P_DOWN == true)
               //  reader_state->gen2_logic_status = POWER_DOWN;
@@ -386,9 +410,9 @@ namespace gr
             {
               reader_state->gen2_logic_status = SEND_QUERY_REP;
             }
-                
+
             reader_state->reader_stats.n_epc_correct+=1;
-                
+
             int result = 0;
             for(int i = 0 ; i < 8 ; ++i)
             {
@@ -408,7 +432,7 @@ namespace gr
             }
           }
           else
-          {              
+          {
             if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
             {
               reader_state->reader_stats.cur_slot_number = 1;
@@ -424,7 +448,7 @@ namespace gr
               //reader_state->gen2_logic_status = SEND_NAK_QR;
               reader_state->gen2_logic_status = SEND_QUERY_REP;
             }
-                
+
             GR_LOG_INFO(d_debug_logger, "EPC FAIL TO DECODE");
           }
         }
@@ -437,7 +461,7 @@ namespace gr
       consume_each(consumed);
       return WORK_CALLED_PRODUCE;
     }
-                
+
     /* Function adapted from https://www.cgran.org/wiki/Gen2 */
     int tag_decoder_impl::check_crc(char * bits, int num_bits)
     {
@@ -447,7 +471,7 @@ namespace gr
       int num_bytes = num_bits / 8;
       data = (unsigned char* )malloc(num_bytes );
       int mask;
-      
+
       for(i = 0; i < num_bytes; i++)
       {
         mask = 0x80;
@@ -461,7 +485,7 @@ namespace gr
         }
       }
       rcvd_crc = (data[num_bytes - 2] << 8) + data[num_bytes -1];
-      
+
       crc_16 = 0xFFFF;
       for (i=0; i < num_bytes - 2; i++)
       {
@@ -478,7 +502,7 @@ namespace gr
         }
       }
       crc_16 = ~crc_16;
-      
+
       if(rcvd_crc != crc_16)
       return -1;
       else
