@@ -75,14 +75,14 @@ namespace gr
       ninput_items_required[0] = noutput_items;
     }
 
-    int tag_decoder_impl::tag_sync(const gr_complex* in, int size) // size: ninput_items[0]
+    int tag_decoder_impl::tag_sync(const gr_complex* in, int size)
     {
       // This method searches the preamble and returns the start index of the tag data.
       // If the correlation value exceeds the threshold, it returns the start index of the tag data.
       // Else, it returns -1.
       // Threshold is an experimental value, so you might change this value within your environment.
 
-      win_size = n_samples_TAG_BIT * TAG_PREAMBLE_BITS;
+      int win_size = n_samples_TAG_BIT * TAG_PREAMBLE_BITS;
       float threshold = 0.01f;  // threshold verifing correlation value
 
       float max_corr = 0.0f;
