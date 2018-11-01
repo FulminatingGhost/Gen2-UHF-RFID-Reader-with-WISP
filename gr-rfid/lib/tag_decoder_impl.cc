@@ -445,7 +445,7 @@ namespace gr
 
         FILE* file = fopen("preamble", "w");
         for(int i=0 ; i<RN16_BITS*n_samples_TAG_BIT ; i++)
-          fprintf(file, "%f ", in[RN16_index+i]);
+          fprintf(file, "%f ", in[RN16_index+i].real());
         fclose(file);
 
         // process for GNU RADIO
