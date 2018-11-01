@@ -171,7 +171,7 @@ namespace gr
         else std::cout << ", low start" << std::endl;
       }
 
-      return k;
+      return max_max_index;
     }
 
     int tag_decoder_impl::decode_single_bit(const gr_complex* in, int index, int mask_level, float* ret_corr)
