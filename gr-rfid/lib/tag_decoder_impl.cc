@@ -160,7 +160,7 @@ namespace gr
         if(max_corr > max_max_corr)
         {
           max_max_corr = max_corr;
-          max_max_index = max_index;
+          max_max_index = k;
         }
       }
 
@@ -171,7 +171,7 @@ namespace gr
         else std::cout << ", low start" << std::endl;
       }
 
-      return max_max_index;
+      return k;
     }
 
     int tag_decoder_impl::decode_single_bit(const gr_complex* in, int index, int mask_level, float* ret_corr)
