@@ -193,7 +193,7 @@ namespace gr
       {
         float average_amp = 0.0f;
         for(int j=-(n_samples_TAG_BIT*0.5) ; j<(n_samples_TAG_BIT*1.5) ; j++)
-          average_amp += in[j];
+          average_amp += in[j].real();
         average_amp /= (2*n_samples_TAG_BIT);
 
         float corr = 0.0f;
@@ -262,7 +262,7 @@ namespace gr
           std::cout << "\t\t[tag_detection] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=", max_index;
 
           if(mask_level) std::cout << " (high start)" << std::endl;
-          else std::cout << " (low start)" <, std::endl;
+          else std::cout << " (low start)" << std::endl;
         }
 
         if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
@@ -274,7 +274,7 @@ namespace gr
         for(int i=0 ; i<n_expected_bit ; i++)
         {
           if(i % 4 == 0) std::cout << " ";
-          std::cout << decoded_data[i];
+          std::cout << decoded_bits[i];
         }
         std::cout << std::endl;
       }
@@ -437,7 +437,7 @@ namespace gr
         if(DEBUG_MESSAGE_TAG_DECODER)
         {
           std::cout << "[tag_decoder] Ready to decode RN16.." << std::endl;
-          std::cout << "\tn_samples_to_ungate= " << n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+          std::cout << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         }
 
         // detect preamble
