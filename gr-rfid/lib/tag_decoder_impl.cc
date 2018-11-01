@@ -75,13 +75,19 @@ namespace gr
     
     int tag_decoder_impl::tag_sync(const gr_complex * in , gr_complex * out, int size)
     {
+      float average_amp = 0.0f;
       int max_index = 0;
       float max = 0,corr;
       gr_complex corr2;
       
-      gr_complex sum;
-      sum = std::accumulate(in, in+size, gr_complex()); //add every data of 'in' which is related
-      sum = sum / gr_complex(size); //divide to make it avg
+      
+      
+      
+      // calculate average_amp
+      for(int i=0 ; i<size ; i++)
+        average_amp += in[i].real();
+      average_amp /= size;
+      
       for (int i=0; i < 6 * n_samples_TAG_BIT ; i++) {
         //for (int i=0; i < n_samples_TAG_BIT * (TAG_PREAMBLE_BITS+RN16_BITS) ; i++) {
         corr2 = gr_complex(0, 0);
@@ -107,7 +113,7 @@ namespace gr
       fclose(preamble_fp);
       
       max_index = max_index + TAG_PREAMBLE_BITS * n_samples_TAG_BIT - n_samples_TAG_BIT/2;
-      if(max > 0.01f)
+      if(max > 0.01f) // threshold
       return max_index;
       else
       return -max_index;
