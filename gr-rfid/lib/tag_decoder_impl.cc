@@ -238,7 +238,7 @@ namespace gr
       int shift = 0;
       for(int i=0 ; i<n_expected_bit ; i++)
       {
-        int idx = index + i*(2*n_samples_TAG_BIT) + shift;
+        int idx = index + i*n_samples_TAG_BIT + shift;
         float max_corr = 0.0f;
         int max_index;
         int curr_shift;
