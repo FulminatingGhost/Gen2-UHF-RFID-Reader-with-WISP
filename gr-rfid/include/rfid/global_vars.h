@@ -133,8 +133,12 @@ namespace gr {
     const int Q_UPDN[3][3]  = { {1,1,0}, {0,0,0}, {0,1,0} };
 
     // FM0 encoding preamble sequences
-    //const int TAG_PREAMBLE[] = {1,1,0,1,0,0,1,0,0,0,1,1};
-    const int TAG_PREAMBLE[] = {1,1,-1,1,-1,-1,1,-1,-1,-1,1,1};
+    // const int TAG_PREAMBLE[] = {1,1,-1,1,-1,-1,1,-1,-1,-1,1,1};
+    const int TAG_PREAMBLE[2][2*TAG_PREAMBLE_BITS] = 
+    {
+      {1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1},
+      {-1, -1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1}
+    }
 
     // Gate block parameters
     const float THRESH_FRACTION = 0.75;     
