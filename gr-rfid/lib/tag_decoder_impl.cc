@@ -443,6 +443,11 @@ namespace gr
         // detect preamble
         int RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
 
+        FILE* file = fopen("preamble", "w");
+        for(int i=0 ; i<RN16_BITS*n_samples_TAG_BIT ; i++)
+          fprintf(file, "%f ", in[RN16_index+i]);
+        fclose(file);
+
         // process for GNU RADIO
         int written_sync = 0;
         for(int j=0 ; j<ninput_items[0] ; j++)
