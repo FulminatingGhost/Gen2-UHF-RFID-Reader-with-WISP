@@ -106,12 +106,12 @@ namespace gr
           for(int k=0 ; k<(n_samples_TAG_BIT/2.0) ; k++)
           {
             for(int m=0 ; m<2 ; m++)  // m: index of TAG_PREAMBLE type
-                corr_candidates[m] += TAG_PREAMBLE[m][j] * (in[i + j*(n_samples_TAG_BIT/2.0) + k].real() - average_amp);
+                corr_candidates[m] += TAG_PREAMBLE[m][j] * (in[i + j*(int)(n_samples_TAG_BIT/2.0) + k].real() - average_amp);
           }
         }
 
         // get max correlation value for ith start point
-        float corr = 0.0f
+        float corr = 0.0f;
         for(int j=0 ; j<2 ; j++)
           if(corr_candidates[j] > corr) corr = corr_candidates[j];
 
