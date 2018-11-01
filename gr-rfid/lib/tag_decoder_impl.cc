@@ -124,6 +124,10 @@ namespace gr
           max_corr = corr;
           max_index = i;
         }
+
+        FILE* file = fopen("tag_sync", "a");
+        fprintf(file, "%d\t%f\n", i, corr);
+        fclose(file);
       }
 
       if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_sync] max_corr= " << max_corr << "\tmax_index= " << max_index << std::endl;
@@ -444,7 +448,7 @@ namespace gr
         int RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
 
         FILE* file = fopen("preamble", "w");
-        for(int i=0 ; i<RN16_BITS*n_samples_TAG_BIT ; i++)
+        for(int i=0 ; i<TAG_PREAMBLE_BITS*n_samples_TAG_BIT ; i++)
           fprintf(file, "%f ", in[RN16_index+i].real());
         fclose(file);
 
