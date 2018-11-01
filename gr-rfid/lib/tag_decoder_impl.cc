@@ -32,7 +32,7 @@
 #define DEBUG_MESSAGE_TAG_DECODER 1
 #define DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT 1
 #define DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION 1
-#define SHIFT_SIZE 0  // used in tag_detection
+#define SHIFT_SIZE 3  // used in tag_detection
 
 namespace gr
 {
@@ -232,8 +232,6 @@ namespace gr
 
       if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_detection] Decoding " << n_expected_bit << " bit(s) of tag data.." << std::endl;
 
-      FILE* file = fopen("rn16", "w");
-
       int mask_level = determine_first_mask_level(in, index);
       int shift = 0;
       for(int i=0 ; i<n_expected_bit ; i++)
@@ -259,11 +257,6 @@ namespace gr
         decoded_bits.push_back(max_index);
         shift += curr_shift;
 
-        fprintf(file, "%d\n", i);
-        for(int j=-(n_samples_TAG_BIT*0.5) ; j<1.5*n_samples_TAG_BIT ; j++)
-          fprintf(file, "%f ", in[idx+j].real());
-        fprintf(file, "\n\n");
-
         if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
         {
           std::cout << "\t\t[tag_detection] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
@@ -274,7 +267,7 @@ namespace gr
 
         if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
       }
-      fclose(file);
+
       if(DEBUG_MESSAGE_TAG_DECODER)
       {
         std::cout << "\t\t[tag_detection] decoded_bits=";
@@ -497,7 +490,6 @@ namespace gr
 
           // go to next state
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
-          while(1) ;  //temp for debugging [!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!REMOVE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!]
           reader_state->gen2_logic_status = SEND_ACK;
         }
 
