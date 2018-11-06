@@ -86,7 +86,7 @@ namespace gr
       // Threshold is an experimental value, so you might change this value within your environment.
 
       int win_size = n_samples_TAG_BIT * TAG_PREAMBLE_BITS;
-      float threshold = 0.02f;  // threshold verifing correlation value
+      float threshold = 0.1f;  // threshold verifing correlation value
 
       float max_corr = 0.0f;
       int max_index = 0;
