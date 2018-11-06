@@ -179,15 +179,27 @@ namespace gr
       std::cout << "| Correctly decoded EPC : "  <<  reader_state->reader_stats.n_epc_correct     << std::endl;
       std::cout << "| Number of unique tags : "  <<  reader_state->reader_stats.tag_reads.size() << std::endl;
 
+      debug << "\n --------------------------" << std::endl;
+      debug << "| Number of queries/queryreps sent : " << reader_state->reader_stats.n_queries_sent - 1 << std::endl;
+      debug << "| Current Inventory round : "          << reader_state->reader_stats.cur_inventory_round << std::endl;
+      debug << " --------------------------"            << std::endl;
+
+      debug << "| Correctly decoded EPC : "  <<  reader_state->reader_stats.n_epc_correct     << std::endl;
+      debug << "| Number of unique tags : "  <<  reader_state->reader_stats.tag_reads.size() << std::endl;
+
       std::map<int,int>::iterator it;
 
       for(it = reader_state->reader_stats.tag_reads.begin(); it != reader_state->reader_stats.tag_reads.end(); it++)
       {
         std::cout << std::hex <<  "| Tag ID : " << it->first << "  ";
         std::cout << "Num of reads : " << std::dec << it->second << std::endl;
+
+        debug << std::hex <<  "| Tag ID : " << it->first << "  ";
+        debug << "Num of reads : " << std::dec << it->second << std::endl;
       }
 
       std::cout << " --------------------------" << std::endl;
+      debug << " --------------------------" << std::endl;
     }
 
     void
@@ -210,7 +222,7 @@ namespace gr
       int written = 0;
 
       consumed = ninput_items[0];
-      //FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
+      FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
       std::ofstream debug("debug_message", std::ios::app);
 
       switch (reader_state->gen2_logic_status)
