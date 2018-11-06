@@ -405,7 +405,6 @@ namespace gr
       return tag_bits;
     }
 
-#include <fstream>
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
@@ -431,7 +430,7 @@ namespace gr
 
       std::vector<float> EPC_bits;
 
-      ofstream file("test");
+      std::ofstream file("test");
       file << "t";
       file.close();
 
