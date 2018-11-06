@@ -24,6 +24,7 @@
 #include <rfid/api.h>
 #include <map>
 #include <sys/time.h>
+#include fstream
 
 namespace gr {
   namespace rfid {

@@ -417,7 +417,7 @@ namespace gr
 
       int written_sync =0;
       int written = 0, consumed = 0;
-      int  EPC_index;
+      int EPC_index;
 
       std::vector<float> RN16_samples_real;
       std::vector<float> EPC_samples_real;
@@ -430,6 +430,10 @@ namespace gr
       int number_of_points = 0;
 
       std::vector<float> EPC_bits;
+
+      ofstream file("test");
+      file << "t";
+      file.close();
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
