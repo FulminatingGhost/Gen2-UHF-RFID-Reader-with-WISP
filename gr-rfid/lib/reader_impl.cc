@@ -210,7 +210,8 @@ namespace gr
       int written = 0;
 
       consumed = ninput_items[0];
-      FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
+      //FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
+      std::ofstream debug("debug_message", std::ios::app);
 
       switch (reader_state->gen2_logic_status)
       {
@@ -252,6 +253,8 @@ namespace gr
         GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
         std::cout << std::endl;
         std::cout << "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round<<std::endl << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number <<std::endl;
+        debug << std::endl;
+        debug << "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round<<std::endl << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number <<std::endl;
         reader_state->reader_stats.n_queries_sent +=1;
         // Controls the other two blocks
         reader_state->decoder_status = DECODER_DECODE_RN16;
@@ -371,7 +374,8 @@ namespace gr
         break;
       }
       consume_each (consumed);
-      return  written;
+      debug.close();
+      return written;
     }
 
     /* Function adapted from https://www.cgran.org/wiki/Gen2 */
