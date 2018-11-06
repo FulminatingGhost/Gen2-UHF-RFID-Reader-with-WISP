@@ -1,4 +1,4 @@
-#Developed by: Nikos Kargas 
+#Developed by: Nikos Kargas
 
 from gnuradio import gr
 from gnuradio import uhd
@@ -10,7 +10,7 @@ from gnuradio import qtgui
 import sys
 import rfid
 
-DEBUG = True
+DEBUG = False
 
 class reader_top_block(gr.top_block):
 
@@ -42,15 +42,15 @@ class reader_top_block(gr.top_block):
     self.sink.set_center_freq(self.freq, 0)
     self.sink.set_gain(self.tx_gain, 0)
     self.sink.set_antenna("TX/RX", 0)
-    
+
   def __init__(self):
     gr.top_block.__init__(self)
 
 
-    #rt = gr.enable_realtime_scheduling() 
+    #rt = gr.enable_realtime_scheduling()
 
     ######## Variables #########
-    self.dac_rate = 1e6                 # DAC rate 
+    self.dac_rate = 1e6                 # DAC rate
     self.adc_rate = 100e6/50            # ADC rate (2MS/s complex samples)
     self.decim     = 1                    # Decimation (downsampling factor)
     self.ampl     = 0.55                  # Output signal amplitude (signal power vary for different RFX900 cards)
@@ -104,8 +104,8 @@ class reader_top_block(gr.top_block):
     else :  # Offline Data
       self.file_source               = blocks.file_source(gr.sizeof_gr_complex*1, "../misc/data/file_source",False)   ## instead of uhd.usrp_source
       #self.file_sink                  = blocks.file_sink(gr.sizeof_gr_complex*1,   "../misc/data/file_sink", False)     ## instead of uhd.usrp_sink
- 
-      ######## Connections ######### 
+
+      ######## Connections #########
       self.connect(self.file_source, self.matched_filter)
       self.connect(self.matched_filter, self.gate)
       self.connect(self.gate, self.tag_decoder)
@@ -113,8 +113,8 @@ class reader_top_block(gr.top_block):
       self.connect(self.reader, self.amp)
       self.connect(self.amp, self.to_complex)
       self.connect(self.to_complex, self.file_sink)
-    
-    #File sinks for logging 
+
+    #File sinks for logging
     self.connect(self.gate, self.file_sink_gate)
     self.connect((self.tag_decoder,1), self.file_sink_decoder) # (Do not comment this line)
     #self.connect(self.file_sink_reader, self.file_sink_reader)
