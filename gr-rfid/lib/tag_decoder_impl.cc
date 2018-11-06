@@ -430,7 +430,7 @@ namespace gr
 
       std::vector<float> EPC_bits;
 
-      std::ofstream file("test", ios::app);
+      std::ofstream file("test", std::ios::app);
       file << "t";
       file.close();
 
