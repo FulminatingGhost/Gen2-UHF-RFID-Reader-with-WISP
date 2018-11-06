@@ -604,7 +604,7 @@ namespace gr
         consumed = reader_state->n_samples_to_ungate;
       }
       consume_each(consumed);
-      std::cout << "bug" << std::endl;
+      //std::cout << "bug" << std::endl;
       return WORK_CALLED_PRODUCE;
     }
 
