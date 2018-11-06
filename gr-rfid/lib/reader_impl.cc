@@ -210,6 +210,7 @@ namespace gr
       int written = 0;
 
       consumed = ninput_items[0];
+      FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
 
       switch (reader_state->gen2_logic_status)
       {
@@ -290,7 +291,6 @@ namespace gr
           reader_state->gate_status    = GATE_SEEK_EPC;
 
           gen_ack_bits(in);
-          std::cout << "send ack" << std::endl;
 
           // Send FrameSync
           memcpy(&out[written], &frame_sync[0], sizeof(float) * frame_sync.size() );

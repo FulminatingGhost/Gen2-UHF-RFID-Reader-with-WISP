@@ -488,7 +488,7 @@ namespace gr
             out[written++] = RN16_bits[i];
           produce(0, written);
 
-          // go to next state
+          // go to the next state
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
           reader_state->gen2_logic_status = SEND_ACK;
         }
@@ -604,7 +604,6 @@ namespace gr
         consumed = reader_state->n_samples_to_ungate;
       }
       consume_each(consumed);
-      std::cout << reader_state->gen2_logic_status << std::endl;
       return WORK_CALLED_PRODUCE;
     }
 
