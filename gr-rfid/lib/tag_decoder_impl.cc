@@ -430,9 +430,7 @@ namespace gr
 
       std::vector<float> EPC_bits;
 
-      std::ofstream file("test", std::ios::app);
-      file << "t";
-      file.close();
+      std::ofstream debug("debug_message", std::ios::app);
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
@@ -442,6 +440,8 @@ namespace gr
           std::cout << "[tag_decoder] Ready to decode RN16.." << std::endl;
           std::cout << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         }
+        debug << "[tag_decoder] Ready to decode RN16.." << std::endl;
+        debug << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
 
         // detect preamble
         int RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
@@ -607,6 +607,7 @@ namespace gr
         consumed = reader_state->n_samples_to_ungate;
       }
       consume_each(consumed);
+      debug.close();
       return WORK_CALLED_PRODUCE;
     }
 
