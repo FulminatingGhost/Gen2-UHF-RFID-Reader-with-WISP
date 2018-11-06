@@ -171,6 +171,8 @@ namespace gr
 
     void reader_impl::print_results()
     {
+      std::ofstream debug("debug_message", std::ios::app);
+
       std::cout << "\n --------------------------" << std::endl;
       std::cout << "| Number of queries/queryreps sent : " << reader_state->reader_stats.n_queries_sent - 1 << std::endl;
       std::cout << "| Current Inventory round : "          << reader_state->reader_stats.cur_inventory_round << std::endl;
@@ -200,6 +202,8 @@ namespace gr
 
       std::cout << " --------------------------" << std::endl;
       debug << " --------------------------" << std::endl;
+
+      debug.close();
     }
 
     void
