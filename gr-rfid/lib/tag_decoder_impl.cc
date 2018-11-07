@@ -91,7 +91,10 @@ namespace gr
       float max_corr = 0.0f;
       int max_index = 0;
 
+      std::ofstream debug(debug_file_path, std::ios::app);
+
       if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_sync] Detecting preamble.." << std::endl;
+      debug << "\t[tag_decoder::tag_sync] Detecting preamble.." << std::endl;
 
       // compare all samples with sliding
       for(int i=0 ; i<size-win_size ; i++)  // i: start point
@@ -127,11 +130,14 @@ namespace gr
       }
 
       if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_sync] max_corr= " << max_corr << "\tmax_index= " << max_index << std::endl;
+      debug << "\t\t[tag_sync] max_corr= " << max_corr << "\tmax_index= " << max_index << std::endl;
 
       // check if correlation value exceeds threshold
       if(max_corr > threshold)
       {
         if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_sync] Preamble successfully detected.." << std::endl;
+        debug << "\t\t[tag_sync] Preamble successfully detected.." << std::endl;
+        debug.close();
         return max_index + win_size;
       }
       else
@@ -142,6 +148,12 @@ namespace gr
           std::cout << "\t\t\tCheck whether if the threshold value is too high!" << std::endl;
           std::cout << "\t\t\tCurrent threshold= " << threshold << std::endl;
         }
+
+        debug << "\t\t[tag_sync] Preamble detection fail.." << std::endl;
+        debug << "\t\t\tCheck whether if the threshold value is too high!" << std::endl;
+        debug << "\t\t\tCurrent threshold= " << threshold << std::endl;
+
+        debug.close();
         return -1;
       }
     }
@@ -151,6 +163,8 @@ namespace gr
     {
       float max_max_corr = 0.0f;
       int max_max_index = -1;
+
+      std::ofstream debug(debug_file_path, std::ios::app);
 
       for(int k=0 ; k<2 ; k++)
       {
@@ -164,13 +178,20 @@ namespace gr
         }
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER)
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[determine_first_mask_level] max_max_corr=" << max_max_corr;
+      debug << "\t\t[determine_first_mask_level] max_max_corr=" << max_max_corr;
+      if(max_max_index)
       {
-        std::cout << "\t\t[determine_first_mask_level] max_max_corr=" << max_max_corr;
-        if(max_max_index) std::cout << ", high start" << std::endl;
-        else std::cout << ", low start" << std::endl;
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << ", high start" << std::endl;
+        debug << ", high start" << std::endl;
+      }
+      else
+      {
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << ", low start" << std::endl;
+        debug << ", low start" << std::endl;
       }
 
+      debug.close();
       return max_max_index;
     }
 
@@ -183,6 +204,8 @@ namespace gr
         {{1, -1, 1, -1}, {1, -1, -1, 1}}, // low start
         {{-1, 1, -1, 1}, {-1, 1, 1, -1}}  // high start
       };
+
+      std::ofstream debug(debug_file_path, std::ios::app);
 
       if(mask_level == -1) mask_level = 0;  // convert for indexing
 
@@ -215,13 +238,21 @@ namespace gr
         }
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT)
+      if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
+      debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
+
+      if(mask_level)
       {
-        std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-        if(mask_level) std::cout << " (high start)" << std::endl;
-        else std::cout << " (low start)" << std::endl;
+        if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (high start)" << std::endl;
+        debug << " (high start)" << std::endl;
+      }
+      else
+      {
+        if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (low start)" << std::endl;
+        debug << " (low start)" << std::endl;
       }
 
+      debug.close();
       (*ret_corr) = max_corr;
       return max_index;
     }
@@ -230,7 +261,10 @@ namespace gr
     {
       std::vector<float> decoded_bits;
 
+      std::ofstream debug(debug_file_path, std::ios::app);
+
       if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_detection] Decoding " << n_expected_bit << " bit(s) of tag data.." << std::endl;
+      debug << "\t[tag_decoder::tag_detection] Decoding " << n_expected_bit << " bit(s) of tag data.." << std::endl;
 
       int mask_level = determine_first_mask_level(in, index);
       int shift = 0;
@@ -258,27 +292,47 @@ namespace gr
         shift += curr_shift;
 
         if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
-        {
-          std::cout << "\t\t[tag_detection] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
+          std::cout << "\t\t[tag_detection - " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
+        debug << "\t\t[tag_detection - " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
 
-          if(mask_level) std::cout << " (high start)" << std::endl;
-          else std::cout << " (low start)" << std::endl;
+        if(mask_level)
+        {
+          if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << " (high start)" << std::endl;
+          debug << " (high start)" << std::endl;
+        }
+        else
+        {
+          if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << " (low start)" << std::endl;
+          debug << " (low start)" << std::endl;
         }
 
         if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER)
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_detection] decoded_bits= ";
+      debug << "\t\t[tag_detection] decoded_bits= ";
+
+      for(int i=0 ; i<n_expected_bit ; i++)
       {
-        std::cout << "\t\t[tag_detection] decoded_bits=";
-        for(int i=0 ; i<n_expected_bit ; i++)
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << decoded_bits[i];
+        debug << decoded_bits[i];
+
+        if(i % 4 == 3)
         {
-          if(i % 4 == 0) std::cout << " ";
-          std::cout << decoded_bits[i];
+          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << " ";
+          debug << " ";
         }
-        std::cout << std::endl;
+        if(i % 32 == 31)
+        {
+          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl << "\t\t\t\t\t";
+          debug << std::endl << "\t\t\t\t\t";
+        }
       }
 
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl;
+      debug << std::endl;
+
+      debug.close();
       return decoded_bits;
     }
 
@@ -430,7 +484,7 @@ namespace gr
 
       std::vector<float> EPC_bits;
 
-      std::ofstream debug("debug_message", std::ios::app);
+      std::ofstream debug(debug_file_path, std::ios::app);
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
@@ -456,6 +510,7 @@ namespace gr
         if(RN16_index == -1)  // fail to detect preamble
         {
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Fail to detect preamble!" << std::endl;
+          debug << "[tag_decoder] Fail to detect preamble!" << std::endl;
 
           reader_state->reader_stats.cur_slot_number++;
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
@@ -470,6 +525,7 @@ namespace gr
             //else
 
             if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\tSlot is full.. Go to new inventory round.." << std::endl;
+            debug << "\tSlot is full.. Go to new inventory round.." << std::endl;
             reader_state->gen2_logic_status = SEND_QUERY;
           }
           else
@@ -478,10 +534,12 @@ namespace gr
           }
 
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl;
+          debug << std::endl;
         }
         else
         {
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Decoding RN16.." << std::endl;
+          debug << "[tag_decoder] Decoding RN16.." << std::endl;
 
           std::vector<float> RN16_bits = tag_detection(in, RN16_index, RN16_BITS-1);  // RN16_BITS includes one dummy bit
 
@@ -493,6 +551,7 @@ namespace gr
 
           // go to the next state
           if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
+          debug << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
           reader_state->gen2_logic_status = SEND_ACK;
         }
 

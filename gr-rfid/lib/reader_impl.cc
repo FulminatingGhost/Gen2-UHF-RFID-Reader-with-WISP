@@ -171,7 +171,7 @@ namespace gr
 
     void reader_impl::print_results()
     {
-      std::ofstream debug("debug_message", std::ios::app);
+      std::ofstream debug(debug_file_path, std::ios::app);
 
       std::cout << "\n --------------------------" << std::endl;
       std::cout << "| Number of queries/queryreps sent : " << reader_state->reader_stats.n_queries_sent - 1 << std::endl;
@@ -227,7 +227,7 @@ namespace gr
 
       consumed = ninput_items[0];
       FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
-      std::ofstream debug("debug_message", std::ios::app);
+      std::ofstream debug(debug_file_path, std::ios::app);
 
       switch (reader_state->gen2_logic_status)
       {

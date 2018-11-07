@@ -98,7 +98,7 @@ namespace gr
       float sample_ampl = 0;
       int written = 0;
 
-      std::ofstream debug("debug_message", std::ios::app);
+      std::ofstream debug(debug_file_path, std::ios::app);
       //std::cout << "PW samples : " << n_samples_PW << std::endl;
 
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
