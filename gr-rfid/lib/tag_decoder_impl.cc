@@ -430,7 +430,7 @@ namespace gr
 
       std::vector<float> EPC_bits;
 
-      std::ofstream debug("debug_message", std::ios::app);
+      std::ofstream debug(debug_message, std::ios::app);
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
