@@ -152,9 +152,6 @@ namespace gr {
     extern READER_STATE * reader_state;
     extern void initialize_reader_state();
 
-    // For debugging
-    std::ofstream debug;
-
   } // namespace rfid
 } // namespace gr
 

@@ -204,6 +204,7 @@ namespace gr
         } // for(int i = 0; i < n_items; i++)
       } // if (reader_state->status == RUNNING)
     consume_each (number_samples_consumed);
+    debug.close();
     return written;
     } // gate_impl::general_work
   } /* namespace rfid */
