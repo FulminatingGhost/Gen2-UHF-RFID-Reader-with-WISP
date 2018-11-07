@@ -30,7 +30,8 @@
 #include "tag_decoder_impl.h"
 
 #define DEBUG_MESSAGE_TAG_DECODER 1
-#define DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT 1
+#define DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT 0
+#define DUBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT 1
 #define DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION 1
 #define SHIFT_SIZE 3  // used in tag_detection
 
@@ -239,17 +240,17 @@ namespace gr
       }
 
       if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-      debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
+      if(DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT) debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
 
       if(mask_level)
       {
         if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (high start)" << std::endl;
-        debug << " (high start)" << std::endl;
+        if(DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT) debug << " (high start)" << std::endl;
       }
       else
       {
         if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (low start)" << std::endl;
-        debug << " (low start)" << std::endl;
+        if(DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT) debug << " (low start)" << std::endl;
       }
 
       debug.close();
@@ -292,8 +293,8 @@ namespace gr
         shift += curr_shift;
 
         if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
-          std::cout << "\t\t[tag_detection - " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
-        debug << "\t\t[tag_detection - " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
+          std::cout << "\t\t[tag_detection " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
+        debug << "\t\t[tag_detection " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
 
         if(mask_level)
         {
@@ -309,8 +310,8 @@ namespace gr
         if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_detection] decoded_bits= ";
-      debug << "\t\t[tag_detection] decoded_bits= ";
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_detection] decoded_bits= ";
+      debug << "\t[tag_detection] decoded_bits= ";
 
       for(int i=0 ; i<n_expected_bit ; i++)
       {
