@@ -153,7 +153,7 @@ namespace gr {
     extern void initialize_reader_state();
 
     // Debug file path
-    std::string debug_message = "debug messsage";
+    std::str debug_message = "debug messsage";
   } // namespace rfid
 } // namespace gr
 
