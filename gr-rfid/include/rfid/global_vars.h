@@ -154,6 +154,7 @@ namespace gr {
 
     // debug file path
     const std::string debug_file_path = "debug_message";
+    const std::string debug_file_path2 = "debug_message_detailed";
 
   } // namespace rfid
 } // namespace gr

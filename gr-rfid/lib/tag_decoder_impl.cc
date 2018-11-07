@@ -31,7 +31,6 @@
 
 #define DEBUG_MESSAGE_TAG_DECODER 1
 #define DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT 0
-#define DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT 1
 #define DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION 1
 #define SHIFT_SIZE 3  // used in tag_detection
 
@@ -206,7 +205,7 @@ namespace gr
         {{-1, 1, -1, 1}, {-1, 1, 1, -1}}  // high start
       };
 
-      std::ofstream debug(debug_file_path, std::ios::app);
+      std::ofstream debug(debug_file_path2, std::ios::app);
 
       if(mask_level == -1) mask_level = 0;  // convert for indexing
 
@@ -240,17 +239,17 @@ namespace gr
       }
 
       if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-      if(DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT) debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
+      debug << "[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
 
       if(mask_level)
       {
         if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (high start)" << std::endl;
-        if(DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT) debug << " (high start)" << std::endl;
+        debug << " (high start)" << std::endl;
       }
       else
       {
         if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (low start)" << std::endl;
-        if(DEBUG_MESSAGE_FILE_TAG_DECODER_DECODE_SINGLE_BIT) debug << " (low start)" << std::endl;
+        debug << " (low start)" << std::endl;
       }
 
       debug.close();
@@ -469,21 +468,14 @@ namespace gr
       const gr_complex *in = (const  gr_complex *) input_items[0];
       float *out = (float *) output_items[0];
 
-      int written_sync =0;
       int written = 0, consumed = 0;
-      int EPC_index;
 
-      std::vector<float> RN16_samples_real;
       std::vector<float> EPC_samples_real;
-
-      std::vector<gr_complex> RN16_samples_complex;
       std::vector<gr_complex> EPC_samples_complex;
 
-      std::vector<float> RN16_bits;
       int number_of_half_bits = 0;
       int number_of_points = 0;
 
-      std::vector<float> EPC_bits;
 
       std::ofstream debug(debug_file_path, std::ios::app);
 
@@ -562,108 +554,104 @@ namespace gr
       // Processing only after n_samples_to_ungate are available and we need to decode an EPC
       else if (reader_state->decoder_status == DECODER_DECODE_EPC && ninput_items[0] >= reader_state->n_samples_to_ungate )
       {
+        if(DEBUG_MESSAGE_TAG_DECODER)
+        {
+          std::cout << "[tag_decoder] Ready to decode EPC.." << std::endl;
+          std::cout << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        }
+        debug << "[tag_decoder] Ready to decode EPC.." << std::endl;
+        debug << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
 
-        //After EPC message send a query rep or query
+        // detect preamble
+        int EPC_index = tag_sync(in, ninput_items[0]);
+
+        // process for GNU RADIO
+        int written_sync = 0;
+        for(int j=0 ; j<ninput_items[0] ; j++)
+          written_sync++;
+        produce(1, written_sync);
+
+        // decode EPC
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Decoding EPC.." << std::endl;
+        debug << "[tag_decoder] Decoding EPC.." << std::endl;
+
+        std::vector<float> EPC_bits = tag_detection(in, EPC_index, EPC_BITS-1);
+
+        // convert EPC_bits from float to char in order to use Buettner's function
+        for(int i=0 ; i<EPC_BITS-1 ; i++)
+        {
+          if(EPC_bits[i]) char_bits[i] = '1';
+          else char_bits[i] = '0';
+        }
+
+        // After EPC message send a query rep or query
         reader_state->reader_stats.cur_slot_number++;
 
-        EPC_index = tag_sync(in,ninput_items[0]);
-        for (int j = 0 ; j < (EPC_BITS + 2)*n_samples_TAG_BIT ; j++ )
+        // check CRC
+        if(check_crc(char_bits, 128) == 1) // success to decode EPC
         {
-          EPC_samples_complex.push_back(in[EPC_index+j]);
-        }
-
-        for (int j = 0; j < ninput_items[0] ; j ++ )
-        {
-          //out_2[written_sync].real() = in[j].real();
-          written_sync ++;
-        }
-        produce(1,written_sync);
-
-
-        EPC_bits = bit_decoding(EPC_samples_complex,EPC_BITS-1,0);
-        std::cout << "                                                                  EPC detect?" << std::endl;
-        for(int i=0 ; i<128 ; i++)
-        {
-          if(i%4==0) std::cout << " ";
-          if(i%16==0) std::cout << "\t";
-          if(i%32==0) std::cout << std::endl;
-          std::cout << EPC_bits[i];
-        }
-
-        if (EPC_bits.size() == EPC_BITS - 1)
-        {
-          std::cout << "                                                                EPC detected!!!!!!!!" << std::endl;
-          // float to char -> use Buettner's function
-          for (int i =0; i < 128; i ++)
+          // calculate tag_id
+          int tag_id = 0;
+          for(int i=0 ; i<8 ; i++)
           {
-            if (EPC_bits[i] == 0)
-            char_bits[i] = '0';
-            else
-            char_bits[i] = '1';
+            tag_id += std::pow(2, 7-i) * EPC_bits[104+i];
           }
-          if(check_crc(char_bits,128) == 1)
+
+          GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << result);
+          std::cout << "                                                                EPC CORRECTLY DECODED TAG ID : " << result << std::endl;
+          debug << "                                                                EPC CORRECTLY DECODED TAG ID : " << result << std::endl;
+
+          // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
+          std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(result);
+          if ( it != reader_state->reader_stats.tag_reads.end())
           {
-            if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
-            {
-              reader_state->reader_stats.cur_slot_number = 1;
-              reader_state->reader_stats.unique_tags_round.push_back(reader_state->reader_stats.tag_reads.size());
-
-              reader_state->reader_stats.cur_inventory_round+=1;
-              //if (P_DOWN == true)
-              //  reader_state->gen2_logic_status = POWER_DOWN;
-              //else
-              reader_state->gen2_logic_status = SEND_QUERY;
-            }
-            else
-            {
-              reader_state->gen2_logic_status = SEND_QUERY_REP;
-            }
-
-            reader_state->reader_stats.n_epc_correct+=1;
-
-            int result = 0;
-            for(int i = 0 ; i < 8 ; ++i)
-            {
-              result += std::pow(2,7-i) * EPC_bits[104+i] ;
-            }
-            GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << result);
-            std::cout << "                                                                EPC CORRECTLY DECODED TAG ID : " << result << std::endl;
-            // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
-            std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(result);
-            if ( it != reader_state->reader_stats.tag_reads.end())
-            {
-              it->second ++;
-            }
-            else
-            {
-              reader_state->reader_stats.tag_reads[result]=1;
-            }
+            it->second ++;
           }
           else
           {
-            if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
-            {
-              reader_state->reader_stats.cur_slot_number = 1;
-              reader_state->reader_stats.cur_inventory_round+=1;
-              //if (P_DOWN == true)
-              //  reader_state->gen2_logic_status = POWER_DOWN;
-              //else
-              //  reader_state->gen2_logic_status = SEND_NAK_Q;
-              reader_state->gen2_logic_status = SEND_QUERY;
-            }
-            else
-            {
-              //reader_state->gen2_logic_status = SEND_NAK_QR;
-              reader_state->gen2_logic_status = SEND_QUERY_REP;
-            }
-
-            GR_LOG_INFO(d_debug_logger, "EPC FAIL TO DECODE");
+            reader_state->reader_stats.tag_reads[result]=1;
           }
+
+          if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
+          {
+            reader_state->reader_stats.cur_slot_number = 1;
+            reader_state->reader_stats.unique_tags_round.push_back(reader_state->reader_stats.tag_reads.size());
+
+            reader_state->reader_stats.cur_inventory_round+=1;
+            //if (P_DOWN == true)
+            //  reader_state->gen2_logic_status = POWER_DOWN;
+            //else
+            reader_state->gen2_logic_status = SEND_QUERY;
+          }
+          else
+          {
+            reader_state->gen2_logic_status = SEND_QUERY_REP;
+          }
+
+          reader_state->reader_stats.n_epc_correct+=1;
+
         }
-        else
+        else  // fail to decode EPC
         {
-          GR_LOG_EMERG(d_debug_logger, "CHECK ME");
+          if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
+          {
+            reader_state->reader_stats.cur_slot_number = 1;
+            reader_state->reader_stats.cur_inventory_round+=1;
+            //if (P_DOWN == true)
+            //  reader_state->gen2_logic_status = POWER_DOWN;
+            //else
+            //  reader_state->gen2_logic_status = SEND_NAK_Q;
+            reader_state->gen2_logic_status = SEND_QUERY;
+          }
+          else
+          {
+            //reader_state->gen2_logic_status = SEND_NAK_QR;
+            reader_state->gen2_logic_status = SEND_QUERY_REP;
+          }
+
+          GR_LOG_INFO(d_debug_logger, "EPC FAIL TO DECODE");
         }
+
         consumed = reader_state->n_samples_to_ungate;
       }
       consume_each(consumed);
