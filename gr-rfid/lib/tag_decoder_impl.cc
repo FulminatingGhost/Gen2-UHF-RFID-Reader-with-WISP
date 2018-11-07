@@ -597,19 +597,19 @@ namespace gr
             tag_id += std::pow(2, 7-i) * EPC_bits[104+i];
           }
 
-          GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << result);
-          std::cout << "                                                                EPC CORRECTLY DECODED TAG ID : " << result << std::endl;
-          debug << "                                                                EPC CORRECTLY DECODED TAG ID : " << result << std::endl;
+          GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << tag_id);
+          std::cout << "                                                                EPC CORRECTLY DECODED TAG ID : " << tag_id << std::endl;
+          debug << "                                                                EPC CORRECTLY DECODED TAG ID : " << tag_id << std::endl;
 
           // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
-          std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(result);
+          std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(tag_id);
           if ( it != reader_state->reader_stats.tag_reads.end())
           {
             it->second ++;
           }
           else
           {
-            reader_state->reader_stats.tag_reads[result]=1;
+            reader_state->reader_stats.tag_reads[tag_id]=1;
           }
 
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
