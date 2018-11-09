@@ -310,8 +310,8 @@ namespace gr
 
         for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
         {
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << in[j].real() << "\t";
-          debug << in[j].real() << "\t";
+          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << in[j].real() << " ";
+          debug << in[j].real() << " ";
         }
 
         decoded_bits.push_back(max_index);
