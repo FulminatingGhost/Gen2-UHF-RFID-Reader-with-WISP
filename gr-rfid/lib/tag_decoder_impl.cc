@@ -239,7 +239,7 @@ namespace gr
       }
 
       if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-      debug << "[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
+      debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
 
       if(mask_level)
       {
@@ -571,17 +571,28 @@ namespace gr
           written_sync++;
         produce(1, written_sync);
 
-        // decode EPC
-        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Decoding EPC.." << std::endl;
-        debug << "[tag_decoder] Decoding EPC.." << std::endl;
-
-        std::vector<float> EPC_bits = tag_detection(in, EPC_index, EPC_BITS-1);
-
-        // convert EPC_bits from float to char in order to use Buettner's function
-        for(int i=0 ; i<EPC_BITS-1 ; i++)
+        if(EPC_index == -1)  // fail to detect preamble
         {
-          if(EPC_bits[i]) char_bits[i] = '1';
-          else char_bits[i] = '0';
+          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Fail to detect preamble!" << std::endl;
+          debug << "[tag_decoder] Fail to detect preamble!" << std::endl;
+
+          for(int i=0 ; i<EPC_BITS-1 ; i++)
+            char_bits[i] = 0;
+        }
+        else
+        {
+          // decode EPC
+          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Decoding EPC.." << std::endl;
+          debug << "[tag_decoder] Decoding EPC.." << std::endl;
+
+          std::vector<float> EPC_bits = tag_detection(in, EPC_index, EPC_BITS-1);
+
+          // convert EPC_bits from float to char in order to use Buettner's function
+          for(int i=0 ; i<EPC_BITS-1 ; i++)
+          {
+            if(EPC_bits[i]) char_bits[i] = '1';
+            else char_bits[i] = '0';
+          }
         }
 
         // After EPC message send a query rep or query
