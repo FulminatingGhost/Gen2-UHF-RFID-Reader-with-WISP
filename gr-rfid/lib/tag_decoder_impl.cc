@@ -605,7 +605,7 @@ namespace gr
           int tag_id = 0;
           for(int i=0 ; i<8 ; i++)
           {
-            tag_id += std::pow(2, 7-i) * EPC_bits[104+i];
+            tag_id += std::pow(2, 7-i) * (char_bits[104+i] - '0');
           }
 
           GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << tag_id);
