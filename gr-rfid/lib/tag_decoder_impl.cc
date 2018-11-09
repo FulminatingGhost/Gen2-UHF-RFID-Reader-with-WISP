@@ -192,6 +192,7 @@ namespace gr
       }
 
       debug.close();
+      if(max_max_index == 0) max_max_index = -1;
       return max_max_index;
     }
 
@@ -314,8 +315,8 @@ namespace gr
           debug << in[j].real() << " ";
         }
 
-        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl;
-        debug << std::endl;
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl << std::endl;
+        debug << std::endl << std::endl;
 
         decoded_bits.push_back(max_index);
         shift += curr_shift;
