@@ -74,7 +74,7 @@ namespace gr {
 
     // Termination criteria
     // const int MAX_INVENTORY_ROUND = 50;
-    const int MAX_NUM_QUERIES     = 20;     // Stop after MAX_NUM_QUERIES have been sent
+    const int MAX_NUM_QUERIES     = 10;     // Stop after MAX_NUM_QUERIES have been sent
 
     // valid values for Q
     const int Q_VALUE [16][4] =
@@ -154,7 +154,7 @@ namespace gr {
 
     // debug file path
     const std::string debug_file_path = "debug_message";
-    const std::string debug_file_path2 = "debug_message_detailed";
+    const std::string debug_file_path2 = "debug_message";
 
   } // namespace rfid
 } // namespace gr
