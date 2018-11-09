@@ -314,12 +314,15 @@ namespace gr
           debug << in[j].real() << " ";
         }
 
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl;
+        debug << std::endl;
+
         decoded_bits.push_back(max_index);
         shift += curr_shift;
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl << "\t[tag_detection] decoded_bits=\t";
-      debug << std::endl << "\t[tag_detection] decoded_bits=\t";
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_detection] decoded_bits=\t";
+      debug << "\t[tag_detection] decoded_bits=\t";
 
       for(int i=0 ; i<n_expected_bit ; i++)
       {
