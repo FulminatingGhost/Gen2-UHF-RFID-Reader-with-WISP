@@ -239,17 +239,17 @@ namespace gr
       }
 
       if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-      debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
+      //debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
 
       if(mask_level)
       {
         if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (high start)" << std::endl;
-        debug << " (high start)" << std::endl;
+        //debug << " (high start)" << std::endl;
       }
       else
       {
         if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (low start)" << std::endl;
-        debug << " (low start)" << std::endl;
+        //debug << " (low start)" << std::endl;
       }
 
       debug.close();
@@ -288,9 +288,6 @@ namespace gr
           }
         }
 
-        decoded_bits.push_back(max_index);
-        shift += curr_shift;
-
         if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
           std::cout << "\t\t[tag_detection " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
         debug << "\t\t[tag_detection " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
@@ -307,10 +304,22 @@ namespace gr
         }
 
         if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
+
+        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t\t[tag_detection] ";
+        debug << "\t\t\t[tag_detection] ";
+
+        for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
+        {
+          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << in[j].real() << "\t";
+          debug << in[j].real() << "\t";
+        }
+
+        decoded_bits.push_back(max_index);
+        shift += curr_shift;
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_detection] decoded_bits= ";
-      debug << "\t[tag_detection] decoded_bits= ";
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl << "\t[tag_detection] decoded_bits=\t";
+      debug << std::endl << "\t[tag_detection] decoded_bits=\t";
 
       for(int i=0 ; i<n_expected_bit ; i++)
       {
