@@ -86,15 +86,15 @@ namespace gr
       // Threshold is an experimental value, so you might change this value within your environment.
 
       int win_size = n_samples_TAG_BIT * TAG_PREAMBLE_BITS;
-      float threshold = 0.1f;  // threshold verifing correlation value
+      float threshold = n_samples_TAG_BIT * 0.0002f;  // threshold verifing correlation value
 
       float max_corr = 0.0f;
       int max_index = 0;
 
       std::ofstream debug(debug_file_path, std::ios::app);
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_sync] Detecting preamble.." << std::endl;
-      debug << "\t[tag_decoder::tag_sync] Detecting preamble.." << std::endl;
+      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_sync] Detecting preamble.. threshold= " << threshold << std::endl;
+      debug << "\t[tag_decoder::tag_sync] Detecting preamble.. threshold= " << threshold << std::endl;
 
       // compare all samples with sliding
       for(int i=0 ; i<size-win_size ; i++)  // i: start point
