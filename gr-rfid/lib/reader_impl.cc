@@ -193,10 +193,10 @@ namespace gr
 
       for(it = reader_state->reader_stats.tag_reads.begin(); it != reader_state->reader_stats.tag_reads.end(); it++)
       {
-        std::cout << std::hex <<  "| Tag ID : " << it->first << "  ";
+        std::cout << "| Tag ID : " << it->first << "  ";
         std::cout << "Num of reads : " << std::dec << it->second << std::endl;
 
-        debug << std::hex <<  "| Tag ID : " << it->first << "  ";
+        debug << "| Tag ID : " << it->first << "  ";
         debug << "Num of reads : " << std::dec << it->second << std::endl;
       }
 
