@@ -104,6 +104,7 @@ namespace gr
         for(int j=0 ; j<win_size ; j++)
           average_amp += in[i+j].real();
         average_amp /= win_size;
+        std::cout << average_amp << "\t";
 
         // calculate normalize_factor
         float normalize_factor = 0.0f;
@@ -114,6 +115,7 @@ namespace gr
           else normalize_factor -= temp;
         }
         normalize_factor /= win_size;
+        std::cout << normalize_factor << std::endl;
 
         // calculate correlation value
         float corr_candidates[2] = {0.0f};
