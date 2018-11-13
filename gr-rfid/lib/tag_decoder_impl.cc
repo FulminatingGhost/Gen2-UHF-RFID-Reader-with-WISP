@@ -110,7 +110,7 @@ namespace gr
         float normalize_factor = 0.0f;
         for(int j=0 ; j<win_size ; j++)
         {
-          int temp = in[i+j].real() - average_amp;
+          float temp = in[i+j].real() - average_amp;
           if(temp > 0) normalize_factor += temp;
           else normalize_factor -= temp;
         }
