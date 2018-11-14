@@ -104,18 +104,13 @@ namespace gr
         for(int j=0 ; j<win_size ; j++)
           average_amp += in[i+j].real();
         average_amp /= win_size;
-        //std::cout << average_amp << "\t";
 
         // calculate normalize_factor
-        float normalize_factor = 0.0f;
+        float standard_deviation = 0.0f;
         for(int j=0 ; j<win_size ; j++)
-        {
-          float temp = in[i+j].real() - average_amp;
-          if(temp > 0) normalize_factor += temp;
-          else normalize_factor -= temp;
-        }
-        normalize_factor /= win_size;
-        //std::cout << normalize_factor << std::endl;
+          standard_deviation += pow(in[i+j].real() - average_amp, 2);
+        standard_deviation /= win_size;
+        standard_deviation = sqrt(standard_deviation);
 
         // calculate correlation value
         float corr_candidates[2] = {0.0f};
@@ -124,7 +119,7 @@ namespace gr
           for(int k=0 ; k<(n_samples_TAG_BIT/2.0) ; k++)
           {
             for(int m=0 ; m<2 ; m++)  // m: index of TAG_PREAMBLE type
-                corr_candidates[m] += TAG_PREAMBLE[m][j] * (in[i + j*(int)(n_samples_TAG_BIT/2.0) + k].real() - average_amp) / normalize_factor;
+                corr_candidates[m] += TAG_PREAMBLE[m][j] * (in[i + j*(int)(n_samples_TAG_BIT/2.0) + k].real() - average_amp) / standard_deviation;
           }
         }
 
