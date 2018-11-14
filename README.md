@@ -1,3 +1,7 @@
+# README file is not updated
+# These codes are in process. These are not ready to release.
+
+# Belows are Nikos Kargas's original README.md
 # Gen2 UHF RFID Reader
 This is a Gen2 UHF RFID Reader. It is able to identify commercial Gen2 RFID Tags with FM0 line coding and 40kHz data rate (BLF), and extract their EPC message. It requires USRPN200 and was tested with a single front-end card (RFX900).  
 Developed by Nikos Kargas in the context of his MSc thesis, School of Electronic & Computer Engineering, Technical Univ. of Crete.  
