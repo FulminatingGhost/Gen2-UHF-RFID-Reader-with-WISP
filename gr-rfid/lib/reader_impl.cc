@@ -228,6 +228,8 @@ namespace gr
       int consumed = 0;
       int written = 0;
 
+      int q_value;
+
       consumed = ninput_items[0];
 
       switch (reader_state->gen2_logic_status)
@@ -279,7 +281,7 @@ namespace gr
         memcpy(&out[written], &preamble[0], sizeof(float) * preamble.size() );
         written+=preamble.size();
 
-        int q_value = gen_query_bits();
+        q_value = gen_query_bits();
 
         for(int i = 0; i < query_bits.size(); i++)
         {
