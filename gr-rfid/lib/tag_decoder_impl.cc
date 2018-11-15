@@ -93,7 +93,7 @@ namespace gr
 
       std::ofstream debugt((DEBUG_MESSAGE+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::out);
 
-      debugt >> "!";
+      debugt << "!";
       debugt.close();
 
       std::ofstream debug(debug_file_path, std::ios::app);
