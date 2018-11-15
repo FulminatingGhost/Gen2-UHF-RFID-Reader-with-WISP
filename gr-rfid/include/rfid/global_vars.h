@@ -157,6 +157,7 @@ namespace gr {
     // debug file path
     #ifdef DEBUG_MESSAGE
     const std::string debug_file_path = "debug_message";
+    const std::string debug_file_path2 = "debug_message";
     const std::string debug_message = "debug_message/";
     #endif
 
