@@ -90,12 +90,12 @@ namespace gr
 
       float max_corr = 0.0f;
       int max_index = 0;
-
+#ifdef DEBUG_MESSAGE
       std::ofstream debugt((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::out);
 
       debugt << "!";
       debugt.close();
-
+#endif
       std::ofstream debug(debug_file_path, std::ios::app);
 
       if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_sync] Detecting preamble.. threshold= " << threshold << std::endl;
