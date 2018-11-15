@@ -126,7 +126,7 @@ if __name__ == '__main__':
   main_block.start()
 
   while(1):
-    inp = raw_input("'Q' to quit \n")
+    inp = raw_input()
     if (inp == "q" or inp == "Q"):
       break
 
