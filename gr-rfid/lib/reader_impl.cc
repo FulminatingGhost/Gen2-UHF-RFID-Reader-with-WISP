@@ -196,11 +196,17 @@ namespace gr
       std::map<int,int>::iterator it;
       for(it = reader_state->reader_stats.tag_reads.begin(); it != reader_state->reader_stats.tag_reads.end(); it++)
         result << "│ " << it->first << "\t\t" << "│ " << it->second << std::endl;
-
+        
       if(reader_state->reader_stats.tag_reads.size())
-        result << "└───────────┴──────────────────────────────────────" << std::endl;
+        result << "├───────────┴──────────────────────────────────────" << std::endl;
       else
-        result << "└──────────────────────────────────────────────────" << std::endl;
+        result << "├──────────────────────────────────────────────────" << std::endl;
+
+      gettimeofday (&reader_state-> reader_stats.end, NULL);
+      result << "| Execution time : " << reader_state-> reader_stats.end.tv_sec - reader_state-> reader_stats.start.tv_sec << " seconds" << std::endl;
+      result << "└──────────────────────────────────────────────────" << std::endl;
+
+      result.close();
     }
 
     void
