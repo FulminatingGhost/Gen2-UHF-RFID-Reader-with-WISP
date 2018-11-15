@@ -264,6 +264,7 @@ namespace gr
     {
       const gr_complex *in = (const  gr_complex *) input_items[0];
       float *out = (float *) output_items[0];
+      int consumed = 0;
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
@@ -387,7 +388,7 @@ namespace gr
             if(i % 4 == 0) std::cout << " ";
             std::cout << EPC_bits[i];
             char_bits[i] = EPC_bits[i] + '0';
-            if(i % 16 == 15) std::cout << std::endl << "│     "
+            if(i % 16 == 15) std::cout << std::endl << "│     ";
           }
 
           // check CRC
