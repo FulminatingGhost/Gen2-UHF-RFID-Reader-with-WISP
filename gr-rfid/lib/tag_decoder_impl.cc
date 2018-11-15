@@ -129,7 +129,7 @@ namespace gr
 
       #ifdef DEBUG_MESSAGE
       std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
-      debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=", max_index << std::endl;
+      debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
       debug << "\t\t\t\t\t** preamble samples **" << std::endl;
       for(int i=0 ; i<win_size ; i++)
         debug << in[max_index+i].real();
@@ -266,11 +266,15 @@ namespace gr
       float *out = (float *) output_items[0];
       int consumed = 0;
 
+      #ifdef DEBUG_MESSAGE
+      std::ofstream debug;
+      #endif
+
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
         #ifdef DEBUG_MESSAGE
-        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
@@ -282,7 +286,7 @@ namespace gr
         // detect preamble
         int RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
         #ifdef DEBUG_MESSAGE
-        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** RN16 samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
           debug << in[RN16_index+i].real();
@@ -349,7 +353,7 @@ namespace gr
       else if (reader_state->decoder_status == DECODER_DECODE_EPC && ninput_items[0] >= reader_state->n_samples_to_ungate )
       {
         #ifdef DEBUG_MESSAGE
-        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
@@ -361,7 +365,7 @@ namespace gr
         // detect preamble
         int EPC_index = tag_sync(in, ninput_items[0]);
         #ifdef DEBUG_MESSAGE
-        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** EPC samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
           debug << in[EPC_index+i].real();
