@@ -226,7 +226,7 @@ namespace gr
       int written = 0;
 
       consumed = ninput_items[0];
-      FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
+//      FILE* file = fopen("why", "w"); fprintf(file, "a"); fclose(file);
       std::ofstream debug(debug_file_path, std::ios::app);
 
       switch (reader_state->gen2_logic_status)
