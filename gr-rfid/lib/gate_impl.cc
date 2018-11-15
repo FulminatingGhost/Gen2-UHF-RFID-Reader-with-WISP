@@ -98,7 +98,6 @@ namespace gr
       float sample_ampl = 0;
       int written = 0;
 
-      std::ofstream debug(debug_file_path, std::ios::app);
       //std::cout << "PW samples : " << n_samples_PW << std::endl;
 
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
@@ -106,9 +105,6 @@ namespace gr
         reader_state-> status != TERMINATED)
       {
         reader_state-> status = TERMINATED;
-        gettimeofday (&reader_state-> reader_stats.end, NULL);
-        std::cout << "| Execution time : " << reader_state-> reader_stats.end.tv_sec - reader_state-> reader_stats.start.tv_sec << " seconds" << std::endl;
-        debug << "| Execution time : " << reader_state-> reader_stats.end.tv_sec - reader_state-> reader_stats.start.tv_sec << " seconds" << std::endl;
         GR_LOG_INFO(d_logger, "Termination");
       }
 
@@ -204,7 +200,6 @@ namespace gr
         } // for(int i = 0; i < n_items; i++)
       } // if (reader_state->status == RUNNING)
     consume_each (number_samples_consumed);
-    debug.close();
     return written;
     } // gate_impl::general_work
   } /* namespace rfid */
