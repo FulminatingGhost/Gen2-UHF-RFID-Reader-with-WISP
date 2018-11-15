@@ -26,6 +26,8 @@
 #include <sys/time.h>
 #include <fstream>
 
+#define DEBUG_MESSAGE
+
 namespace gr {
   namespace rfid {
 
@@ -153,8 +155,10 @@ namespace gr {
     extern void initialize_reader_state();
 
     // debug file path
+    #ifdef DEBUG_MESSAGE
     const std::string debug_file_path = "debug_message";
-    const std::string debug_file_path2 = "debug_message";
+    const std::string debug_message = "debug_message/";
+    #endif
 
   } // namespace rfid
 } // namespace gr
