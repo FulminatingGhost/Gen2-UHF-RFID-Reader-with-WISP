@@ -91,7 +91,7 @@ namespace gr
       float max_corr = 0.0f;
       int max_index = 0;
 
-      std::ofstream debugt((((DEBUG_MESSAGE+std::to_string(reader_state->reader_stats.cur_inventory_round)).c_str()+"_").c_str()+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::out);
+      std::ofstream debugt((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::out);
 
       debugt << "!";
       debugt.close();
