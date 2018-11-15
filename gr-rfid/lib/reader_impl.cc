@@ -147,7 +147,7 @@ namespace gr
 
       int q_value = 0;
       for(int i=0 ; i<4 ; i++)
-        q_value += std::pow(2, 3-i) * &Q_VALUE[FIXED_Q][i];
+        q_value += std::pow(2, 3-i) * Q_VALUE[FIXED_Q][i];
       return q_value;
     }
 
