@@ -178,7 +178,7 @@ namespace gr
     {
       std::ofstream result(result_file_path, std::ios::out);
 
-      result << std::cout << "┌──────────────────────────────────────────────────" << std::endl;
+      result << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
       result << "│ Number of QUERY/QUERYREP sent: " << reader_state->reader_stats.n_queries_sent << std::endl;
       result << "│ Number of ACK sent: " << reader_state->reader_stats.n_ack_sent << std::endl;
       result << "│ Current Inventory round: " << reader_state->reader_stats.cur_inventory_round << std::endl;
@@ -196,7 +196,7 @@ namespace gr
       std::map<int,int>::iterator it;
       for(it = reader_state->reader_stats.tag_reads.begin(); it != reader_state->reader_stats.tag_reads.end(); it++)
         result << "│ " << it->first << "\t\t" << "│ " << it->second << std::endl;
-        
+
       if(reader_state->reader_stats.tag_reads.size())
         result << "├───────────┴──────────────────────────────────────" << std::endl;
       else
@@ -269,7 +269,7 @@ namespace gr
         GR_LOG_INFO(d_debug_logger, "QUERY");
         GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
         std::cout << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
-        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader.stats.cur_slot_number << std::endl;
+        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
         reader_state->reader_stats.n_queries_sent +=1;
 
         // Controls the other two blocks
@@ -353,7 +353,7 @@ namespace gr
         case SEND_QUERY_REP:
         GR_LOG_INFO(d_debug_logger, "SEND QUERY_REP");
         GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
-        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader.stats.cur_slot_number << std::endl;
+        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
 
         // Controls the other two blocks
         reader_state->decoder_status = DECODER_DECODE_RN16;
