@@ -29,9 +29,6 @@
 #include <sys/time.h>
 #include "tag_decoder_impl.h"
 
-#define DEBUG_MESSAGE_TAG_DECODER 1
-#define DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT 0
-#define DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION 0
 #define SHIFT_SIZE 3  // used in tag_detection
 
 namespace gr
@@ -79,30 +76,19 @@ namespace gr
     }
 
     int tag_decoder_impl::tag_sync(const gr_complex* in, int size)
+    // This method searches the preamble and returns the start index of the tag data.
+    // If the correlation value exceeds the threshold, it returns the start index of the tag data.
+    // Else, it returns -1.
+    // Threshold is an experimental value, so you might change this value within your environment.
     {
-      // This method searches the preamble and returns the start index of the tag data.
-      // If the correlation value exceeds the threshold, it returns the start index of the tag data.
-      // Else, it returns -1.
-      // Threshold is an experimental value, so you might change this value within your environment.
-
       int win_size = n_samples_TAG_BIT * TAG_PREAMBLE_BITS;
       float threshold = n_samples_TAG_BIT * 4;  // threshold verifing correlation value
 
       float max_corr = 0.0f;
       int max_index = 0;
-#ifdef DEBUG_MESSAGE
-      std::ofstream debugt((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::out);
-
-      debugt << "!";
-      debugt.close();
-#endif
-      std::ofstream debug(debug_file_path, std::ios::app);
-
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_sync] Detecting preamble.. threshold= " << threshold << std::endl;
-      debug << "\t[tag_decoder::tag_sync] Detecting preamble.. threshold= " << threshold << std::endl;
 
       // compare all samples with sliding
-      for(int i=0 ; i<size-win_size ; i++)  // i: start point
+      for(int i=0 ; i<(n_samples_TAG_BIT*EXTRA_BITS)-win_size ; i++)  // i: start point
       {
         // calculate average_amp (threshold)
         float average_amp = 0.0f;
@@ -141,33 +127,19 @@ namespace gr
         }
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_sync] max_corr= " << max_corr << "\tmax_index= " << max_index << std::endl;
-      debug << "\t\t[tag_sync] max_corr= " << max_corr << "\tmax_index= " << max_index << std::endl;
+      #ifdef DEBUG_MESSAGE
+      std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+      debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=", max_index << std::endl;
+      debug << "\t\t\t\t\t** preamble samples **" << std::endl;
+      for(int i=0 ; i<win_size ; i++)
+        debug << in[max_index+i].real();
+      debug << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
+      debug.close();
+      #endif
 
       // check if correlation value exceeds threshold
-      if(max_corr > threshold)
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[tag_sync] Preamble successfully detected.." << std::endl;
-        debug << "\t\t[tag_sync] Preamble successfully detected.." << std::endl;
-        debug.close();
-        return max_index + win_size;
-      }
-      else
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER)
-        {
-          std::cout << "\t\t[tag_sync] Preamble detection fail.." << std::endl;
-          std::cout << "\t\t\tCheck whether if the threshold value is too high!" << std::endl;
-          std::cout << "\t\t\tCurrent threshold= " << threshold << std::endl;
-        }
-
-        debug << "\t\t[tag_sync] Preamble detection fail.." << std::endl;
-        debug << "\t\t\tCheck whether if the threshold value is too high!" << std::endl;
-        debug << "\t\t\tCurrent threshold= " << threshold << std::endl;
-
-        debug.close();
-        return -1;
-      }
+      if(max_corr > threshold) return max_index + win_size;
+      else return -1;
     }
 
     int tag_decoder_impl::determine_first_mask_level(const gr_complex* in, int index)
@@ -175,8 +147,6 @@ namespace gr
     {
       float max_max_corr = 0.0f;
       int max_max_index = -1;
-
-      std::ofstream debug(debug_file_path, std::ios::app);
 
       for(int k=0 ; k<2 ; k++)
       {
@@ -190,20 +160,6 @@ namespace gr
         }
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t\t[determine_first_mask_level] max_max_corr=" << max_max_corr;
-      debug << "\t\t[determine_first_mask_level] max_max_corr=" << max_max_corr;
-      if(max_max_index)
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << ", high start" << std::endl;
-        debug << ", high start" << std::endl;
-      }
-      else
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << ", low start" << std::endl;
-        debug << ", low start" << std::endl;
-      }
-
-      debug.close();
       if(max_max_index == 0) max_max_index = -1;
       return max_max_index;
     }
@@ -217,8 +173,6 @@ namespace gr
         {{1, -1, 1, -1}, {1, -1, -1, 1}}, // low start
         {{-1, 1, -1, 1}, {-1, 1, 1, -1}}  // high start
       };
-
-      std::ofstream debug(debug_file_path2, std::ios::app);
 
       if(mask_level == -1) mask_level = 0;  // convert for indexing
 
@@ -251,21 +205,6 @@ namespace gr
         }
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-      //debug << "\t\t\t[decode_single_bit] max_corr=" << max_corr << ", decoded bit=" << max_index;
-
-      if(mask_level)
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (high start)" << std::endl;
-        //debug << " (high start)" << std::endl;
-      }
-      else
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER_DECODE_SINGLE_BIT) std::cout << " (low start)" << std::endl;
-        //debug << " (low start)" << std::endl;
-      }
-
-      debug.close();
       (*ret_corr) = max_corr;
       return max_index;
     }
@@ -273,11 +212,6 @@ namespace gr
     std::vector<float> tag_decoder_impl::tag_detection(const gr_complex* in, int index, int n_expected_bit)
     {
       std::vector<float> decoded_bits;
-
-      std::ofstream debug(debug_file_path, std::ios::app);
-
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_decoder::tag_detection] Decoding " << n_expected_bit << " bit(s) of tag data.." << std::endl;
-      debug << "\t[tag_decoder::tag_detection] Decoding " << n_expected_bit << " bit(s) of tag data.." << std::endl;
 
       int mask_level = determine_first_mask_level(in, index);
       int shift = 0;
@@ -301,63 +235,24 @@ namespace gr
           }
         }
 
-        if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION)
-          std::cout << "\t\t[tag_detection " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
-        debug << "\t\t[tag_detection " << i+1 << "th bit] max_corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
-
-        if(mask_level)
-        {
-          if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << " (high start)" << std::endl;
-          debug << " (high start)" << std::endl;
-        }
-        else
-        {
-          if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << " (low start)" << std::endl;
-          debug << " (low start)" << std::endl;
-        }
+        #ifdef DEBUG_MESSAGE
+        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug << "[" << i+1 << "th bit] corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
+        if(mask_level) debug << " (high start)" << std::endl;
+        else debug << " (low start)" << std::endl;
+        debug << "\t\t\t\t\t** shifted bit samples **" << std::endl;
+        for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
+          debug << in[i].real();
+        debug << "\t\t\t\t\t** shifted bit samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+        #endif
 
         if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
-
-        if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << "\t\t\t[tag_detection] ";
-        debug << "\t\t\t[tag_detection] ";
-
-        for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
-        {
-          if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << in[j].real() << " ";
-          debug << in[j].real() << " ";
-        }
-
-        if(DEBUG_MESSAGE_TAG_DECODER_TAG_DETECTION) std::cout << std::endl << std::endl;
-        debug << std::endl << std::endl;
 
         decoded_bits.push_back(max_index);
         shift += curr_shift;
       }
 
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\t[tag_detection] decoded_bits=\t";
-      debug << "\t[tag_detection] decoded_bits=\t";
-
-      for(int i=0 ; i<n_expected_bit ; i++)
-      {
-        if(DEBUG_MESSAGE_TAG_DECODER) std::cout << decoded_bits[i];
-        debug << decoded_bits[i];
-
-        if(i % 4 == 3)
-        {
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << " ";
-          debug << " ";
-        }
-        if(i % 32 == 31)
-        {
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl << "\t\t\t\t\t";
-          debug << std::endl << "\t\t\t\t\t";
-        }
-      }
-
-      if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl;
-      debug << std::endl;
-
-      debug.close();
       return decoded_bits;
     }
 
@@ -370,102 +265,108 @@ namespace gr
       const gr_complex *in = (const  gr_complex *) input_items[0];
       float *out = (float *) output_items[0];
 
-      int written = 0, consumed = 0;
-
-      std::vector<float> EPC_samples_real;
-      std::vector<gr_complex> EPC_samples_complex;
-
-      int number_of_half_bits = 0;
-      int number_of_points = 0;
-
-
-      std::ofstream debug(debug_file_path, std::ios::app);
-
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
-        if(DEBUG_MESSAGE_TAG_DECODER)
-        {
-          std::cout << "[tag_decoder] Ready to decode RN16.." << std::endl;
-          std::cout << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
-        }
-        debug << "[tag_decoder] Ready to decode RN16.." << std::endl;
-        debug << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        #ifdef DEBUG_MESSAGE
+        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        debug << "\t\t\t\t\t** samples from gate **" << std::endl;
+        for(int i=0 ; i<ninput_items[0] ; i++)
+          debug << in[i].real();
+        debug << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+        #endif
 
         // detect preamble
         int RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
+        #ifdef DEBUG_MESSAGE
+        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug << "\t\t\t\t\t** RN16 samples **" << std::endl;
+        for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
+          debug << in[RN16_index+i].real();
+        debug << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+        #endif
 
         // process for GNU RADIO
         int written_sync = 0;
-        for(int j=0 ; j<ninput_items[0] ; j++)
+        for(int i=0 ; i<ninput_items[0] ; i++)
           written_sync++;
         produce(1, written_sync);
 
         // decode RN16
-        if(RN16_index == -1)  // fail to detect preamble
+        if(RN16_index != -1)
         {
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Fail to detect preamble!" << std::endl;
-          debug << "[tag_decoder] Fail to detect preamble!" << std::endl;
+          std::cout << "│ Preamble detected!" << std::endl;
+          std::vector<float> RN16_bits = tag_detection(in, RN16_index, RN16_BITS-1);  // RN16_BITS includes one dummy bit
+
+          // write RN16_bits to the next block
+          std::cout << "│ RN16=";
+          int written = 0;
+          for(int i=0 ; i<RN16_bits.size() ; i++)
+          {
+            if(i % 4 == 0) std::cout << " ";
+            std::cout << RN16_bits[i];
+            out[written++] = RN16_bits[i];
+          }
+          produce(0, written);
+
+          // go to the next state
+          std::cout << std::endl << "├──────────────────────────────────────────────────" << std::endl;
+          reader_state->gen2_logic_status = SEND_ACK;
+        }
+        else  // fail to detect preamble
+        {
+          std::cout << "│ Preamble detection fail.." << std::endl;
 
           reader_state->reader_stats.cur_slot_number++;
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
           {
+          reader_state->reader_stats.cur_inventory_round ++;
             reader_state->reader_stats.cur_slot_number = 1;
-            reader_state->reader_stats.unique_tags_round.push_back(reader_state->reader_stats.tag_reads.size());
-
-            reader_state->reader_stats.cur_inventory_round += 1;
 
             //if (P_DOWN == true)
             //  reader_state->gen2_logic_status = POWER_DOWN;
             //else
 
-            if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "\tSlot is full.. Go to new inventory round.." << std::endl;
-            debug << "\tSlot is full.. Go to new inventory round.." << std::endl;
+            std::cout << std::endl << "└──────────────────────────────────────────────────" << std::endl;
             reader_state->gen2_logic_status = SEND_QUERY;
           }
           else
           {
+            std::cout << std::endl << "├──────────────────────────────────────────────────" << std::endl;
             reader_state->gen2_logic_status = SEND_QUERY_REP;
           }
-
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << std::endl;
-          debug << std::endl;
-        }
-        else
-        {
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Decoding RN16.." << std::endl;
-          debug << "[tag_decoder] Decoding RN16.." << std::endl;
-
-          std::vector<float> RN16_bits = tag_detection(in, RN16_index, RN16_BITS-1);  // RN16_BITS includes one dummy bit
-
-          // write RN16_bits to the next block
-          int written = 0;
-          for(int i=0 ; i<RN16_bits.size() ; i++)
-            out[written++] = RN16_bits[i];
-          produce(0, written);
-
-          // go to the next state
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
-          debug << "[tag_decoder] RN16 decoded.." << std::endl << std::endl;
-          reader_state->gen2_logic_status = SEND_ACK;
         }
 
         // process for GNU RADIO
         consumed = reader_state->n_samples_to_ungate;
       }
+
       // Processing only after n_samples_to_ungate are available and we need to decode an EPC
       else if (reader_state->decoder_status == DECODER_DECODE_EPC && ninput_items[0] >= reader_state->n_samples_to_ungate )
       {
-        if(DEBUG_MESSAGE_TAG_DECODER)
-        {
-          std::cout << "[tag_decoder] Ready to decode EPC.." << std::endl;
-          std::cout << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
-        }
-        debug << "[tag_decoder] Ready to decode EPC.." << std::endl;
-        debug << "\tn_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        #ifdef DEBUG_MESSAGE
+        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        debug << "\t\t\t\t\t** samples from gate **" << std::endl;
+        for(int i=0 ; i<ninput_items[0] ; i++)
+          debug << in[i].real();
+        debug << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+        #endif
 
         // detect preamble
         int EPC_index = tag_sync(in, ninput_items[0]);
+        #ifdef DEBUG_MESSAGE
+        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug << "\t\t\t\t\t** EPC samples **" << std::endl;
+        for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
+          debug << in[EPC_index+i].real();
+        debug << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+        #endif
 
         // process for GNU RADIO
         int written_sync = 0;
@@ -473,102 +374,69 @@ namespace gr
           written_sync++;
         produce(1, written_sync);
 
-        if(EPC_index == -1)  // fail to detect preamble
+        // decode EPC
+        if(EPC_index != -1)
         {
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Fail to detect preamble!" << std::endl;
-          debug << "[tag_decoder] Fail to detect preamble!" << std::endl;
-
-          for(int i=0 ; i<EPC_BITS-1 ; i++)
-            char_bits[i] = 0;
-        }
-        else
-        {
-          // decode EPC
-          if(DEBUG_MESSAGE_TAG_DECODER) std::cout << "[tag_decoder] Decoding EPC.." << std::endl;
-          debug << "[tag_decoder] Decoding EPC.." << std::endl;
-
-          std::vector<float> EPC_bits = tag_detection(in, EPC_index, EPC_BITS-1);
+          std::cout << "│ Preamble detected!" << std::endl;
+          std::vector<float> EPC_bits = tag_detection(in, EPC_index, EPC_BITS-1);  // EPC_BITS includes one dummy bit
 
           // convert EPC_bits from float to char in order to use Buettner's function
-          for(int i=0 ; i<EPC_BITS-1 ; i++)
+          std::cout << "│ EPC=";
+          for(int i=0 ; i<EPC_bits.size() ; i++)
           {
-            if(EPC_bits[i]) char_bits[i] = '1';
-            else char_bits[i] = '0';
+            if(i % 4 == 0) std::cout << " ";
+            std::cout << EPC_bits[i];
+            char_bits[i] = EPC_bits[i] + '0';
+            if(i % 16 == 15) std::cout << std::endl << "│     "
           }
+
+          // check CRC
+          if(check_crc(char_bits, 128) == 1) // success to decode EPC
+          {
+            // calculate tag_id
+            int tag_id = 0;
+            for(int i=0 ; i<8 ; i++)
+              tag_id += std::pow(2, 7-i) * EPC_bits[104+i];
+
+            GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << tag_id);
+            std::cout << "│ CRC check success! Tag ID= " << tag_id << std::endl;
+            reader_state->reader_stats.n_epc_correct+=1;
+
+            // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
+            std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(tag_id);
+            if ( it != reader_state->reader_stats.tag_reads.end())
+              it->second ++;
+            else
+              reader_state->reader_stats.tag_reads[tag_id]=1;
+          }
+          else std::cout << "│ CRC check fail.." << std::endl;
         }
+        else std::cout << "│ Preamble detection fail.." << std::endl;
 
         // After EPC message send a query rep or query
         reader_state->reader_stats.cur_slot_number++;
-
-        // check CRC
-        if(check_crc(char_bits, 128) == 1) // success to decode EPC
+        if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
         {
-          // calculate tag_id
-          int tag_id = 0;
-          for(int i=0 ; i<8 ; i++)
-          {
-            tag_id += std::pow(2, 7-i) * (char_bits[104+i] - '0');
-          }
+          reader_state->reader_stats.cur_inventory_round ++;
+          reader_state->reader_stats.cur_slot_number = 1;
 
-          GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << tag_id);
-          std::cout << "                                                                EPC CORRECTLY DECODED TAG ID : " << tag_id << std::endl;
-          debug << "                                                                EPC CORRECTLY DECODED TAG ID : " << tag_id << std::endl;
+          //if (P_DOWN == true)
+          //  reader_state->gen2_logic_status = POWER_DOWN;
+          //else
 
-          // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
-          std::map<int,int>::iterator it = reader_state->reader_stats.tag_reads.find(tag_id);
-          if ( it != reader_state->reader_stats.tag_reads.end())
-          {
-            it->second ++;
-          }
-          else
-          {
-            reader_state->reader_stats.tag_reads[tag_id]=1;
-          }
-
-          if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
-          {
-            reader_state->reader_stats.cur_slot_number = 1;
-            reader_state->reader_stats.unique_tags_round.push_back(reader_state->reader_stats.tag_reads.size());
-
-            reader_state->reader_stats.cur_inventory_round+=1;
-            //if (P_DOWN == true)
-            //  reader_state->gen2_logic_status = POWER_DOWN;
-            //else
-            reader_state->gen2_logic_status = SEND_QUERY;
-          }
-          else
-          {
-            reader_state->gen2_logic_status = SEND_QUERY_REP;
-          }
-
-          reader_state->reader_stats.n_epc_correct+=1;
-
+          std::cout << std::endl << "└──────────────────────────────────────────────────" << std::endl;
+          reader_state->gen2_logic_status = SEND_QUERY;
         }
-        else  // fail to decode EPC
+        else
         {
-          if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
-          {
-            reader_state->reader_stats.cur_slot_number = 1;
-            reader_state->reader_stats.cur_inventory_round+=1;
-            //if (P_DOWN == true)
-            //  reader_state->gen2_logic_status = POWER_DOWN;
-            //else
-            //  reader_state->gen2_logic_status = SEND_NAK_Q;
-            reader_state->gen2_logic_status = SEND_QUERY;
-          }
-          else
-          {
-            //reader_state->gen2_logic_status = SEND_NAK_QR;
-            reader_state->gen2_logic_status = SEND_QUERY_REP;
-          }
-
-          GR_LOG_INFO(d_debug_logger, "EPC FAIL TO DECODE");
+          std::cout << std::endl << "├──────────────────────────────────────────────────" << std::endl;
+          reader_state->gen2_logic_status = SEND_QUERY_REP;
         }
 
+        // process for GNU RADIO
         consumed = reader_state->n_samples_to_ungate;
       }
       consume_each(consumed);
-      debug.close();
       return WORK_CALLED_PRODUCE;
     }
 

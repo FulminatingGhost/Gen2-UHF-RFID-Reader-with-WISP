@@ -39,6 +39,7 @@ namespace gr {
     struct READER_STATS
     {
       int n_queries_sent;
+      int n_ack_sent;
 
       int cur_inventory_round;
       int cur_slot_number;
@@ -48,9 +49,7 @@ namespace gr {
 
       int n_epc_correct;
 
-
-      std::vector<int>  unique_tags_round;
-       std::map<int,int> tag_reads;
+      std::map<int,int> tag_reads;
 
       struct timeval start, end;
     };
@@ -109,6 +108,7 @@ namespace gr {
     const int RN16_BITS          = 17;  // Dummy bit at the end
     const int EPC_BITS            = 129;  // PC + EPC + CRC16 + Dummy = 6 + 16 + 96 + 16 + 1 = 135
     const int QUERY_LENGTH        = 22;  // Query length in bits
+    const int EXTRA_BITS          = 8; // extra bits to ungate
 
     const int T_READER_FREQ = 40816;     // BLF = 40kHz
     const float TAG_BIT_D   = 1.0/T_READER_FREQ * pow(10,6); // Duration in us
@@ -154,10 +154,8 @@ namespace gr {
     extern READER_STATE * reader_state;
     extern void initialize_reader_state();
 
-    // debug file path
-
-    const std::string debug_file_path = "debug_message2";
-    const std::string debug_file_path2 = "debug_message2";
+    // file path
+    const std::string result_file_path = "result";
     #ifdef DEBUG_MESSAGE
     const std::string debug_message = "debug_message/";
     #endif

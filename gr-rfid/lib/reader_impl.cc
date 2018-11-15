@@ -128,7 +128,7 @@ namespace gr
       gen_query_adjust_bits();
     }
 
-    void reader_impl::gen_query_bits()
+    int reader_impl::gen_query_bits()
     {
       int num_ones = 0, num_zeros = 0;
 
@@ -144,6 +144,11 @@ namespace gr
 
       query_bits.insert(query_bits.end(), &Q_VALUE[FIXED_Q][0], &Q_VALUE[FIXED_Q][4]);
       crc_append(query_bits);
+
+      int q_value = 0;
+      for(int i=0 ; i<4 ; i++)
+        q_value += std::pow(2, 3-i) * &Q_VALUE[FIXED_Q][i];
+      return q_value;
     }
 
     void reader_impl::gen_ack_bits(const float * in)
@@ -171,39 +176,31 @@ namespace gr
 
     void reader_impl::print_results()
     {
-      std::ofstream debug(debug_file_path, std::ios::app);
+      std::ofstream result(result_file_path, std::ios::out);
 
-      std::cout << "\n --------------------------" << std::endl;
-      std::cout << "| Number of queries/queryreps sent : " << reader_state->reader_stats.n_queries_sent - 1 << std::endl;
-      std::cout << "| Current Inventory round : "          << reader_state->reader_stats.cur_inventory_round << std::endl;
-      std::cout << " --------------------------"            << std::endl;
+      result << std::cout << "┌──────────────────────────────────────────────────" << std::endl;
+      result << "│ Number of QUERY/QUERYREP sent: " << reader_state->reader_stats.n_queries_sent << std::endl;
+      result << "│ Number of ACK sent: " << reader_state->reader_stats.n_ack_sent << std::endl;
+      result << "│ Current Inventory round: " << reader_state->reader_stats.cur_inventory_round << std::endl;
+      result << "├──────────────────────────────────────────────────" << std::endl;
+      result << "│ Number of correctly decoded EPC: " << reader_state->reader_stats.n_epc_correct << std::endl;
+      result << "│ Number of unique tags: " << reader_state->reader_stats.tag_reads.size() << std::endl;
 
-      std::cout << "| Correctly decoded EPC : "  <<  reader_state->reader_stats.n_epc_correct     << std::endl;
-      std::cout << "| Number of unique tags : "  <<  reader_state->reader_stats.tag_reads.size() << std::endl;
-
-      debug << "\n --------------------------" << std::endl;
-      debug << "| Number of queries/queryreps sent : " << reader_state->reader_stats.n_queries_sent - 1 << std::endl;
-      debug << "| Current Inventory round : "          << reader_state->reader_stats.cur_inventory_round << std::endl;
-      debug << " --------------------------"            << std::endl;
-
-      debug << "| Correctly decoded EPC : "  <<  reader_state->reader_stats.n_epc_correct     << std::endl;
-      debug << "| Number of unique tags : "  <<  reader_state->reader_stats.tag_reads.size() << std::endl;
-
-      std::map<int,int>::iterator it;
-
-      for(it = reader_state->reader_stats.tag_reads.begin(); it != reader_state->reader_stats.tag_reads.end(); it++)
+      if(reader_state->reader_stats.tag_reads.size())
       {
-        std::cout << "| Tag ID : " << it->first << "  ";
-        std::cout << "Num of reads : " << std::dec << it->second << std::endl;
-
-        debug << "| Tag ID : " << it->first << "  ";
-        debug << "Num of reads : " << std::dec << it->second << std::endl;
+        result << "├───────────┬──────────────────────────────────────" << std::endl;
+        result << "│ Tag ID\t│ Num of reads" << std::endl;
+        result << "├───────────┼──────────────────────────────────────" << std::endl;
       }
 
-      std::cout << " --------------------------" << std::endl;
-      debug << " --------------------------" << std::endl;
+      std::map<int,int>::iterator it;
+      for(it = reader_state->reader_stats.tag_reads.begin(); it != reader_state->reader_stats.tag_reads.end(); it++)
+        result << "│ " << it->first << "\t\t" << "│ " << it->second << std::endl;
 
-      debug.close();
+      if(reader_state->reader_stats.tag_reads.size())
+        result << "└───────────┴──────────────────────────────────────" << std::endl;
+      else
+        result << "└──────────────────────────────────────────────────" << std::endl;
     }
 
     void
@@ -226,8 +223,6 @@ namespace gr
       int written = 0;
 
       consumed = ninput_items[0];
-
-      std::ofstream debug(debug_file_path, std::ios::app);
 
       switch (reader_state->gen2_logic_status)
       {
@@ -267,17 +262,18 @@ namespace gr
         case SEND_QUERY:
         GR_LOG_INFO(d_debug_logger, "QUERY");
         GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
-        std::cout << std::endl;
-        std::cout << "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round<<std::endl << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number <<std::endl;
-        debug << std::endl;
-        debug << "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round<<std::endl << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number <<std::endl;
+        std::cout << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
+        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader.stats.cur_slot_number << std::endl;
         reader_state->reader_stats.n_queries_sent +=1;
+
         // Controls the other two blocks
         reader_state->decoder_status = DECODER_DECODE_RN16;
         reader_state->gate_status    = GATE_SEEK_RN16;
 
         memcpy(&out[written], &preamble[0], sizeof(float) * preamble.size() );
         written+=preamble.size();
+
+        int q_value = gen_query_bits();
 
         for(int i = 0; i < query_bits.size(); i++)
         {
@@ -296,15 +292,19 @@ namespace gr
         memcpy(&out[written], &cw_query[0], sizeof(float) * cw_query.size() );
         written+=cw_query.size();
 
+        std::cout << "│ Send Query | Q= " << q_value << std::endl;
+        std::cout << "├──────────────────────────────────────────────────" << std::endl;
+
         // Return to IDLE
         reader_state->gen2_logic_status = IDLE;
-        gen_query_bits();
         break;
 
         case SEND_ACK:
         GR_LOG_INFO(d_debug_logger, "SEND ACK");
         if (ninput_items[0] == RN16_BITS - 1)
         {
+          reader_state->reader_stats.n_ack_sent +=1;
+
           // Controls the other two blocks
           reader_state->decoder_status = DECODER_DECODE_EPC;
           reader_state->gate_status    = GATE_SEEK_EPC;
@@ -328,6 +328,10 @@ namespace gr
               written += data_0.size();
             }
           }
+
+          std::cout << "│ Send ACK" << std::endl;
+          std::cout << "├──────────────────────────────────────────────────" << std::endl;
+
           consumed = ninput_items[0];
           reader_state->gen2_logic_status = SEND_CW;
         }
@@ -343,6 +347,8 @@ namespace gr
         case SEND_QUERY_REP:
         GR_LOG_INFO(d_debug_logger, "SEND QUERY_REP");
         GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
+        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader.stats.cur_slot_number << std::endl;
+
         // Controls the other two blocks
         reader_state->decoder_status = DECODER_DECODE_RN16;
         reader_state->gate_status    = GATE_SEEK_RN16;
@@ -353,6 +359,9 @@ namespace gr
 
         memcpy(&out[written], &cw_query[0], sizeof(float) * cw_query.size());
         written+=cw_query.size();
+
+        std::cout << "│ Send QueryRep" << std::endl;
+        std::cout << "├──────────────────────────────────────────────────" << std::endl;
 
         reader_state->gen2_logic_status = IDLE;    // Return to IDLE
         break;
@@ -390,7 +399,6 @@ namespace gr
         break;
       }
       consume_each (consumed);
-      debug.close();
       return written;
     }
 
