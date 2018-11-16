@@ -132,8 +132,8 @@ namespace gr
       debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
       debug << "\t\t\t\t\t** preamble samples **" << std::endl;
       for(int i=0 ; i<win_size ; i++)
-        debug << in[max_index+i].real();
-      debug << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug << in[max_index+i].real() << " ";
+      debug << std::endl << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
       debug.close();
       #endif
 
@@ -242,8 +242,8 @@ namespace gr
         else debug << " (low start)" << std::endl;
         debug << "\t\t\t\t\t** shifted bit samples **" << std::endl;
         for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
-          debug << in[i].real();
-        debug << "\t\t\t\t\t** shifted bit samples **" << std::endl << std::endl << std::endl << std::endl;
+          debug << in[i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** shifted bit samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
@@ -278,8 +278,8 @@ namespace gr
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
-          debug << in[i].real();
-        debug << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+          debug << in[i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
@@ -289,8 +289,8 @@ namespace gr
         debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** RN16 samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
-          debug << in[RN16_index+i].real();
-        debug << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
+          debug << in[RN16_index+i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
@@ -357,8 +357,8 @@ namespace gr
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
-          debug << in[i].real();
-        debug << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+          debug << in[i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
@@ -368,8 +368,8 @@ namespace gr
         debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** EPC samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
-          debug << in[EPC_index+i].real();
-        debug << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
+          debug << in[EPC_index+i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
