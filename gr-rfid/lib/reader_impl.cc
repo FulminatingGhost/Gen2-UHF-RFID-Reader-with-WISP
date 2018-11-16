@@ -203,7 +203,7 @@ namespace gr
         result << "├──────────────────────────────────────────────────" << std::endl;
 
       gettimeofday (&reader_state-> reader_stats.end, NULL);
-      result << "| Execution time : " << reader_state-> reader_stats.end.tv_sec - reader_state-> reader_stats.start.tv_sec << " seconds" << std::endl;
+      result << "│ Execution time : " << reader_state-> reader_stats.end.tv_sec - reader_state-> reader_stats.start.tv_sec << " seconds" << std::endl;
       result << "└──────────────────────────────────────────────────" << std::endl;
 
       result.close();
