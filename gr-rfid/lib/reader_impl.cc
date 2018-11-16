@@ -231,6 +231,7 @@ namespace gr
       int q_value;
 
       consumed = ninput_items[0];
+      std::cout << "A";
 
       switch (reader_state->gen2_logic_status)
       {
