@@ -429,12 +429,12 @@ namespace gr
           //  reader_state->gen2_logic_status = POWER_DOWN;
           //else
 
-          std::cout << std::endl << "└──────────────────────────────────────────────────" << std::endl;
+          std::cout << "└──────────────────────────────────────────────────" << std::endl;
           reader_state->gen2_logic_status = SEND_QUERY;
         }
         else
         {
-          std::cout << std::endl << "├──────────────────────────────────────────────────" << std::endl;
+          std::cout << "├──────────────────────────────────────────────────" << std::endl;
           reader_state->gen2_logic_status = SEND_QUERY_REP;
         }
 

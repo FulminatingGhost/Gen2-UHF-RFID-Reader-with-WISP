@@ -188,9 +188,9 @@ namespace gr
 
       if(reader_state->reader_stats.tag_reads.size())
       {
-        result << "├───────────┬──────────────────────────────────────" << std::endl;
+        result << "├───────────────┬──────────────────────────────────" << std::endl;
         result << "│ Tag ID\t│ Num of reads" << std::endl;
-        result << "├───────────┼──────────────────────────────────────" << std::endl;
+        result << "├───────────────┼──────────────────────────────────" << std::endl;
       }
 
       std::map<int,int>::iterator it;
@@ -198,7 +198,7 @@ namespace gr
         result << "│ " << it->first << "\t\t" << "│ " << it->second << std::endl;
 
       if(reader_state->reader_stats.tag_reads.size())
-        result << "├───────────┴──────────────────────────────────────" << std::endl;
+        result << "├───────────────┴──────────────────────────────────" << std::endl;
       else
         result << "├──────────────────────────────────────────────────" << std::endl;
 
