@@ -341,7 +341,7 @@ namespace gr
             }
           }
 
-          reader_state->reader_stats.query_sent.push_back((std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str());
+          reader_state->reader_stats.ack_sent.push_back((std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str());
           std::cout << "│ Send ACK" << std::endl;
           std::cout << "├──────────────────────────────────────────────────" << std::endl;
 
