@@ -184,7 +184,7 @@ namespace gr
       result << "│ ";
       for(int i=0 ; i<reader_state->reader_stats.ack_sent.size() ; i++)
         result << reader_state->reader_stats.ack_sent[i] << " ";
-      result << "│ Current Inventory round: " << reader_state->reader_stats.cur_inventory_round << std::endl;
+      result << std::endl << "│ Current Inventory round: " << reader_state->reader_stats.cur_inventory_round << std::endl;
       result << "├──────────────────────────────────────────────────" << std::endl;
       result << "│ Number of correctly decoded EPC: " << reader_state->reader_stats.n_epc_correct << std::endl;
       result << "│ Number of unique tags: " << reader_state->reader_stats.tag_reads.size() << std::endl;
