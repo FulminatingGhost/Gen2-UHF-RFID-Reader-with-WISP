@@ -181,6 +181,9 @@ namespace gr
       result << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
       result << "│ Number of QUERY/QUERYREP sent: " << reader_state->reader_stats.n_queries_sent << std::endl;
       result << "│ Number of ACK sent: " << reader_state->reader_stats.n_ack_sent << std::endl;
+      result << "│ " <<;
+      for(int i=0 ; i<reader_state->reader_stats.ack_sent.end() ; i++)
+        result << reader_state->reader_stats.ack_sent[i] << " ";
       result << "│ Current Inventory round: " << reader_state->reader_stats.cur_inventory_round << std::endl;
       result << "├──────────────────────────────────────────────────" << std::endl;
       result << "│ Number of correctly decoded EPC: " << reader_state->reader_stats.n_epc_correct << std::endl;
@@ -338,6 +341,7 @@ namespace gr
             }
           }
 
+          reader_state->reader_stats.query_sent.push_back((std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str());
           std::cout << "│ Send ACK" << std::endl;
           std::cout << "├──────────────────────────────────────────────────" << std::endl;
 

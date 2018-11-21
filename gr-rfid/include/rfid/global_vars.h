@@ -49,6 +49,7 @@ namespace gr {
 
       int n_epc_correct;
 
+      std::vector<std::string> ack_sent;
       std::map<int,int> tag_reads;
 
       struct timeval start, end;
