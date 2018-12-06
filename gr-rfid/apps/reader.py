@@ -56,7 +56,7 @@ class reader_top_block(gr.top_block):
     self.ampl     = 0.55                  # Output signal amplitude (signal power vary for different RFX900 cards)
     self.freq     = 910e6                # Modulation frequency (can be set between 902-920)
     self.rx_gain   = 0                   # RX Gain (gain at receiver)
-    self.tx_gain   = 20                  # RFX900 no Tx gain option
+    self.tx_gain   = 20                    # RFX900 no Tx gain option
 
     self.usrp_address_source = "addr=192.168.1.2,recv_frame_size=256"
     self.usrp_address_sink   = "addr=192.168.1.2,recv_frame_size=256"
@@ -126,7 +126,7 @@ if __name__ == '__main__':
   main_block.start()
 
   while(1):
-    inp = raw_input()
+    inp = raw_input("'Q' to quit \n")
     if (inp == "q" or inp == "Q"):
       break
 

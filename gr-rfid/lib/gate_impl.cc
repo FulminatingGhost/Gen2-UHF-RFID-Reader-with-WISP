@@ -112,13 +112,13 @@ namespace gr
       if(reader_state->gate_status == GATE_SEEK_EPC)
       {
         reader_state->gate_status = GATE_CLOSED;
-        reader_state->n_samples_to_ungate = (EPC_BITS + TAG_PREAMBLE_BITS) * n_samples_TAG_BIT + EXTRA_BITS*n_samples_TAG_BIT;
+        reader_state->n_samples_to_ungate = (EPC_BITS + TAG_PREAMBLE_BITS + EXTRA_BITS) * n_samples_TAG_BIT;
         n_samples = 0;
       }
       else if (reader_state->gate_status == GATE_SEEK_RN16)
       {
         reader_state->gate_status = GATE_CLOSED;
-        reader_state->n_samples_to_ungate = (RN16_BITS + TAG_PREAMBLE_BITS) * n_samples_TAG_BIT + EXTRA_BITS*n_samples_TAG_BIT;
+        reader_state->n_samples_to_ungate = (RN16_BITS + TAG_PREAMBLE_BITS + EXTRA_BITS) * n_samples_TAG_BIT;
         n_samples = 0;
       }
 

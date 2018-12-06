@@ -88,7 +88,8 @@ namespace gr
       int max_index = 0;
 
       // compare all samples with sliding
-      for(int i=0 ; i<(n_samples_TAG_BIT*EXTRA_BITS)-win_size ; i++)  // i: start point
+      //for(int i=0 ; i<(n_samples_TAG_BIT*EXTRA_BITS)-win_size ; i++)  // i: start point
+      for(int i=0 ; i<size-win_size ; i++)  // i: start point
       {
         // calculate average_amp (threshold)
         float average_amp = 0.0f;
@@ -110,7 +111,7 @@ namespace gr
           for(int k=0 ; k<(n_samples_TAG_BIT/2.0) ; k++)
           {
             for(int m=0 ; m<2 ; m++)  // m: index of TAG_PREAMBLE type
-                corr_candidates[m] += TAG_PREAMBLE[m][j] * (in[i + j*(int)(n_samples_TAG_BIT/2.0) + k].real() - average_amp) / standard_deviation;
+                corr_candidates[m] += TAG_PREAMBLE[m][j] * ((in[i + j*(int)(n_samples_TAG_BIT/2.0) + k].real() - average_amp) / standard_deviation);
           }
         }
 
@@ -329,6 +330,7 @@ namespace gr
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
           {
           reader_state->reader_stats.cur_inventory_round ++;
+            reader_state->reader_stats.cur_inventory_round ++;
             reader_state->reader_stats.cur_slot_number = 1;
 
             //if (P_DOWN == true)
