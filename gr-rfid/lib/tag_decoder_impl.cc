@@ -329,7 +329,6 @@ namespace gr
           reader_state->reader_stats.cur_slot_number++;
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
           {
-          reader_state->reader_stats.cur_inventory_round ++;
             reader_state->reader_stats.cur_inventory_round ++;
             reader_state->reader_stats.cur_slot_number = 1;
 
