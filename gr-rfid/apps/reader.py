@@ -51,7 +51,7 @@ class reader_top_block(gr.top_block):
 
     ######## Variables #########
     self.dac_rate = 1e6                 # DAC rate
-    self.adc_rate = 100e6/50            # ADC rate (2MS/s complex samples)
+    self.adc_rate = 10.8e6            # ADC rate (2MS/s complex samples)
     self.decim     = 1                    # Decimation (downsampling factor)
     self.ampl     = 0.55                  # Output signal amplitude (signal power vary for different RFX900 cards)
     self.freq     = 910e6                # Modulation frequency (can be set between 902-920)
