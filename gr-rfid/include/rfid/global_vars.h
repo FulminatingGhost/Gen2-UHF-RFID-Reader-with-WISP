@@ -92,7 +92,7 @@ namespace gr {
     // Duration in us
     const int CW_D         = 250;    // Carrier wave
     const int P_DOWN_D     = 2000;    // power down
-    const int T1_D         = 40;//200;    // Time from Interrogator transmission to Tag response (250 us)
+    const int T1_D         = 25;//200;    // Time from Interrogator transmission to Tag response (250 us)
     const int T2_D         = 480;    // Time from Tag response to Interrogator transmission. Max value = 20.0 * T_tag = 500us
     const int PW_D         = 12;      // Half Tari
     const int DELIM_D       = 12;      // A preamble shall comprise a fixed-length start delimiter 12.5us +/-5%
@@ -109,7 +109,7 @@ namespace gr {
     const int RN16_BITS          = 17;  // Dummy bit at the end
     const int EPC_BITS            = 129;  // PC + EPC + CRC16 + Dummy = 6 + 16 + 96 + 16 + 1 = 135
     const int QUERY_LENGTH        = 22;  // Query length in bits
-    const int EXTRA_BITS          = 8; // extra bits to ungate
+    const int EXTRA_BITS          = 10; // extra bits to ungate
 
     const int T_READER_FREQ = 40000;     // BLF = 40kHz
     const float TAG_BIT_D   = 1.0/T_READER_FREQ * pow(10,6); // Duration in us
