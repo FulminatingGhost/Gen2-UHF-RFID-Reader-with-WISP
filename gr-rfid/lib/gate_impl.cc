@@ -57,17 +57,17 @@ namespace gr
       win_samples.resize(win_length);
       dc_samples.resize(dc_length);
 
-      GR_LOG_INFO(d_logger, "T1 samples : " << n_samples_T1);
-      GR_LOG_INFO(d_logger, "PW samples : " << n_samples_PW);
+      //GR_LOG_INFO(d_logger, "T1 samples : " << n_samples_T1);
+      //GR_LOG_INFO(d_logger, "PW samples : " << n_samples_PW);
 
-      GR_LOG_INFO(d_logger, "Samples of Tag bit : "<< n_samples_TAG_BIT);
-      GR_LOG_INFO(d_logger, "Size of window : " << win_length);
-      GR_LOG_INFO(d_logger, "Size of window for dc offset estimation : " << dc_length);
-      GR_LOG_INFO(d_logger, "Duration of window for dc offset estimation : " << DC_SIZE_D << " us");
+      //GR_LOG_INFO(d_logger, "Samples of Tag bit : "<< n_samples_TAG_BIT);
+      //GR_LOG_INFO(d_logger, "Size of window : " << win_length);
+      //GR_LOG_INFO(d_logger, "Size of window for dc offset estimation : " << dc_length);
+      //GR_LOG_INFO(d_logger, "Duration of window for dc offset estimation : " << DC_SIZE_D << " us");
 
 
       // First block to be scheduled
-      GR_LOG_INFO(d_logger, "Initializing reader state...");
+      //GR_LOG_INFO(d_logger, "Initializing reader state...");
       initialize_reader_state();
     }
 
@@ -109,7 +109,7 @@ namespace gr
         reader_state-> status != TERMINATED)
       {
         reader_state-> status = TERMINATED;
-        GR_LOG_INFO(d_logger, "Termination");
+        //GR_LOG_INFO(d_logger, "Termination");
       }
 
         // Gate block is controlled by the Gen2 Logic block
@@ -185,7 +185,7 @@ namespace gr
 
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
             {
-              GR_LOG_INFO(d_debug_logger, "READER COMMAND DETECTED");
+              //GR_LOG_INFO(d_debug_logger, "READER COMMAND DETECTED");
 
               reader_state->gate_status = GATE_OPEN;
 

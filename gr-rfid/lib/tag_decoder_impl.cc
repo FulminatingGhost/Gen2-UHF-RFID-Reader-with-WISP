@@ -58,7 +58,7 @@ namespace gr
       char_bits = (char *) malloc( sizeof(char) * 128);
 
       n_samples_TAG_BIT = TAG_BIT_D * s_rate / pow(10,6);
-      GR_LOG_INFO(d_logger, "Number of samples of Tag bit : "<< n_samples_TAG_BIT);
+      //GR_LOG_INFO(d_logger, "Number of samples of Tag bit : "<< n_samples_TAG_BIT);
     }
 
     /*
@@ -286,6 +286,18 @@ namespace gr
           debug << norm_in[i] << " ";
         debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
+
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_iq").c_str(), std::ios::app);
+        debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        debug << "\t\t\t\t\t** samples from gate (I) **" << std::endl;
+        for(int i=0 ; i<ninput_items[0] ; i++)
+          debug << in[i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+        debug << "\t\t\t\t\t** samples from gate (Q) **" << std::endl;
+        for(int i=0 ; i<ninput_items[0] ; i++)
+          debug << in[i].imag() << " ";
+        debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
         #endif
 
         // detect preamble
@@ -295,6 +307,17 @@ namespace gr
         debug << "\t\t\t\t\t** RN16 samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
           debug << norm_in[RN16_index+i] << " ";
+        debug << std::endl << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_iq").c_str(), std::ios::app);
+        debug << "\t\t\t\t\t** RN16 samples (I) **" << std::endl;
+        for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
+          debug << in[RN16_index+i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug << "\t\t\t\t\t** RN16 samples (Q) **" << std::endl;
+        for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
+          debug << in[RN16_index+i].imag() << " ";
         debug << std::endl << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -365,6 +388,18 @@ namespace gr
           debug << norm_in[i] << " ";
         debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
+
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_iq").c_str(), std::ios::app);
+        debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
+        debug << "\t\t\t\t\t** samples from gate (I) **" << std::endl;
+        for(int i=0 ; i<ninput_items[0] ; i++)
+          debug << in[i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+        debug << "\t\t\t\t\t** samples from gate (Q) **" << std::endl;
+        for(int i=0 ; i<ninput_items[0] ; i++)
+          debug << in[i].imag() << " ";
+        debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
         #endif
 
         // detect preamble
@@ -374,6 +409,17 @@ namespace gr
         debug << "\t\t\t\t\t** EPC samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
           debug << norm_in[EPC_index+i] << " ";
+        debug << std::endl << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_iq").c_str(), std::ios::app);
+        debug << "\t\t\t\t\t** EPC samples (I) **" << std::endl;
+        for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
+          debug << in[EPC_index+i].real() << " ";
+        debug << std::endl << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug << "\t\t\t\t\t** EPC samples (Q) **" << std::endl;
+        for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
+          debug << in[EPC_index+i].imag() << " ";
         debug << std::endl << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -408,7 +454,7 @@ namespace gr
             for(int i=0 ; i<8 ; i++)
               tag_id += std::pow(2, 7-i) * EPC_bits[104+i];
 
-            GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << tag_id);
+            //GR_LOG_INFO(d_debug_logger, "EPC CORRECTLY DECODED, TAG ID : " << tag_id);
             std::cout << "│ CRC check success! Tag ID= " << tag_id << std::endl;
             reader_state->reader_stats.n_epc_correct+=1;
 
