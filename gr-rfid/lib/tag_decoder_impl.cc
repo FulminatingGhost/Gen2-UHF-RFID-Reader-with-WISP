@@ -129,7 +129,7 @@ namespace gr
       }
 
       #ifdef DEBUG_MESSAGE
-      std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+      debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
       debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
       debug << "\t\t\t\t\t** preamble samples **" << std::endl;
       for(int i=0 ; i<win_size ; i++)
@@ -237,7 +237,7 @@ namespace gr
         }
 
         #ifdef DEBUG_MESSAGE
-        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "[" << i+1 << "th bit] corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
         if(mask_level) debug << " (high start)" << std::endl;
         else debug << " (low start)" << std::endl;
