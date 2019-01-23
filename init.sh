@@ -10,5 +10,5 @@ sudo ldconfig
 cd ../misc
 mkdir data
 cd data
-touch source mathed_filter gate decoder
+touch source matched_filter gate decoder
 cd ../../apps
