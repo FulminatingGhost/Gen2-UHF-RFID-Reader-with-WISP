@@ -133,7 +133,7 @@ namespace gr
       debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
       debug << "\t\t\t\t\t** preamble samples **" << std::endl;
       for(int i=0 ; i<win_size ; i++)
-        debug << in[max_index+i] << " ";
+        debug << normalize_factorin[max_index+i] << " ";
       debug << std::endl << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
       debug.close();
       #endif
@@ -214,7 +214,7 @@ namespace gr
     {
       std::vector<float> decoded_bits;
 
-      int mask_level = determine_first_mask_level(in, index);
+      int mask_level = determine_first_mask_level(norm_in, index);
       int shift = 0;
       for(int i=0 ; i<n_expected_bit ; i++)
       {
@@ -264,7 +264,7 @@ namespace gr
       gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const  gr_complex *) input_items[0];
-      float *norm_in = new float[ninput_itmes[0]];
+      float *norm_in = new float[ninput_items[0]];
       float *out = (float *) output_items[0];
       int consumed = 0;
 
