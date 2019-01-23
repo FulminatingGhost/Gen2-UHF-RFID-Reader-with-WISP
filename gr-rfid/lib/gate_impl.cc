@@ -172,7 +172,7 @@ namespace gr
               reader_state->magn_squared_samples.push_back(std::norm(in[i] - dc_est));
               //out[written] = gr_complex(std::abs((in[i] - dc_est).imag()), 0);
               //out[written] = std::norm(in[i] - dc_est);
-              out[written] = std::abs(std::sqrt(std::norm(in[i])) - std::sqrt(std::norm(dc_est)));
+              out[written] = std::abs(std::sqrt(std::norm(in[i]));// - std::sqrt(std::norm(dc_est)));
               written++;
 
               num_pulses = 0;
@@ -187,7 +187,7 @@ namespace gr
             //out[written] = in[i] - dc_est; // Remove offset from complex samples
             //out[written] = std::norm(in[i] - dc_est);
             //out[written] = gr_complex(std::abs((in[i] - dc_est).imag()), 0);
-            out[written] = std::abs(std::sqrt(std::norm(in[i])) - std::sqrt(std::norm(dc_est)));
+            out[written] = std::abs(std::sqrt(std::norm(in[i]));// - std::sqrt(std::norm(dc_est)));
 
             written++;
             if (n_samples >= reader_state->n_samples_to_ungate)
