@@ -313,7 +313,7 @@ namespace gr
         log << "│ Send Query | Q= " << q_value << std::endl;
         log << "├──────────────────────────────────────────────────" << std::endl;
         log.close();
-        std::cout << "Query(Q=" << q_value << ") ";
+        std::cout << "Query(Q=" << q_value << ") | ";
 
         // Return to IDLE
         reader_state->gen2_logic_status = IDLE;
@@ -354,7 +354,7 @@ namespace gr
           log << "│ Send ACK" << std::endl;
           log << "├──────────────────────────────────────────────────" << std::endl;
           log.close();
-          std::cout << "ACK ";
+          std::cout << "ACK | ";
 
           consumed = ninput_items[0];
           reader_state->gen2_logic_status = SEND_CW;
@@ -391,7 +391,7 @@ namespace gr
         log << "│ Send QueryRep" << std::endl;
         log << "├──────────────────────────────────────────────────" << std::endl;
         log.close();
-        std::cout << "QueryRep ";
+        std::cout << "QueryRep | ";
 
         reader_state->gen2_logic_status = IDLE;    // Return to IDLE
         break;
