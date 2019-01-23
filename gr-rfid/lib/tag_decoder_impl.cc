@@ -479,7 +479,7 @@ namespace gr
             log.open("debug_message", std::ios::app);
             log << "CRC check success! Tag ID= " << tag_id << std::endl;
             log.close();
-            std::cout << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tTag ID= " << tag_id;
+            std::cout << "\t\t\t\t\t\t\t\t\t\tTag ID= " << tag_id;
             reader_state->reader_stats.n_epc_correct+=1;
 
             // Save part of Tag's EPC message (EPC[104:111] in decimal) + number of reads
