@@ -98,10 +98,6 @@ namespace gr
       float sample_ampl = 0;
       int written = 0;
 
-      #ifdef DEBUG_MESSAGE
-      std::ofstream debug;
-      #endif
-
       //std::cout << "PW samples : " << n_samples_PW << std::endl;
 
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
@@ -148,14 +144,14 @@ namespace gr
 
             n_samples++;
 
-            #ifdef DEBUG_MESSAGE
+            /*#ifdef DEBUG_MESSAGE
             if(signal_state == NEG_EDGE)
             {
               debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
               debug << "sample_ampl= " << sample_ampl << ", sample_thresh= " << sample_thresh << ", signal_state= " << signal_state << std::endl;
               debug.close();
             }
-            #endif
+            #endif*/
 
             // Potitive edge -> Negative edge
             if( sample_ampl < sample_thresh && signal_state == POS_EDGE)
@@ -174,14 +170,14 @@ namespace gr
               n_samples = 0;
             }
 
-            #ifdef DEBUG_MESSAGE
+            /*#ifdef DEBUG_MESSAGE
             if(signal_state == NEG_EDGE)
             {
               debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
               debug << "\tn_samples= " << n_samples << ", n_samples_T1= " << n_samples_T1 << ", signal_state= " << signal_state << ", num_pulses= " << num_pulses << ", NUM_PULSES_COMMAND= " << NUM_PULSES_COMMAND << std::endl;
               debug.close();
             }
-            #endif
+            #endif*/
 
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
             {

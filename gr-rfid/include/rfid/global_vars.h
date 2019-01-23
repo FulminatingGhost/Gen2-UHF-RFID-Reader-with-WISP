@@ -158,6 +158,7 @@ namespace gr {
     // file path
     const std::string result_file_path = "result";
     #ifdef DEBUG_MESSAGE
+    std::ofstream debug;
     const std::string debug_message = "debug_data/";
     #endif
 

@@ -264,13 +264,9 @@ namespace gr
       gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const  gr_complex *) input_items[0];
-      gr_complex *norm_in = new gr_complex[ninput_items[0]];
+      float *norm_in = new float[ninput_itmes[0]];
       float *out = (float *) output_items[0];
       int consumed = 0;
-
-      #ifdef DEBUG_MESSAGE
-      std::ofstream debug;
-      #endif
 
       for(int i=0 ; i<ninput_items[0] ; i++)
         norm_in[i] = std::sqrt(std::norm(in[i]));
@@ -283,7 +279,7 @@ namespace gr
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
-          debug << norm_in[i].real() << " ";
+          debug << norm_in[i] << " ";
         debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -294,7 +290,7 @@ namespace gr
         debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** RN16 samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
-          debug << norm_in[RN16_index+i].real() << " ";
+          debug << norm_in[RN16_index+i] << " ";
         debug << std::endl << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -362,7 +358,7 @@ namespace gr
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
-          debug << norm_in[i].real() << " ";
+          debug << norm_in[i] << " ";
         debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -373,7 +369,7 @@ namespace gr
         debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** EPC samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
-          debug << norm_in[EPC_index+i].real() << " ";
+          debug << norm_in[EPC_index+i] << " ";
         debug << std::endl << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
