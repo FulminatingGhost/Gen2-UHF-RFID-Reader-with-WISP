@@ -268,6 +268,10 @@ namespace gr
       float *out = (float *) output_items[0];
       int consumed = 0;
 
+      #ifdef DEBUG_MESSAGE
+      std::ofstream debug;
+      #endif
+
       for(int i=0 ; i<ninput_items[0] ; i++)
         norm_in[i] = std::sqrt(std::norm(in[i]));
 

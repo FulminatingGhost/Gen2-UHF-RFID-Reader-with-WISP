@@ -53,8 +53,5 @@ namespace gr {
 
       gettimeofday (&reader_state-> reader_stats.start, NULL);
     }
-    #ifdef DEBUG_MESSAGE
-    std::ofstream debug;
-    #endif
   } /* namespace rfid */
 } /* namespace gr */

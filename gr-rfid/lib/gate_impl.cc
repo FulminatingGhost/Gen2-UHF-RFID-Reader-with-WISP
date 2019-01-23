@@ -98,6 +98,10 @@ namespace gr
       float sample_ampl = 0;
       int written = 0;
 
+      /*#ifdef DEBUG_MESSAGE
+      std::ofstream debug;
+      #endif*/
+
       //std::cout << "PW samples : " << n_samples_PW << std::endl;
 
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
