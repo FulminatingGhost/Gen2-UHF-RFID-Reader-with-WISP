@@ -264,12 +264,16 @@ namespace gr
       gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const  gr_complex *) input_items[0];
+      gr_complex *norm_in = new gr_complex[ninput_items[0]];
       float *out = (float *) output_items[0];
       int consumed = 0;
 
       #ifdef DEBUG_MESSAGE
       std::ofstream debug;
       #endif
+
+      for(int i=0 ; i<ninput_items[0] ; i++)
+        norm_in[i] = std::sqrt(std::norm(in[i]));
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
@@ -279,18 +283,18 @@ namespace gr
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
-          debug << in[i].real() << " ";
+          debug << norm_in[i].real() << " ";
         debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
         // detect preamble
-        int RN16_index = tag_sync(in, ninput_items[0]);  //find where the tag data bits start
+        int RN16_index = tag_sync(norm_in, ninput_items[0]);  //find where the tag data bits start
         #ifdef DEBUG_MESSAGE
         debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** RN16 samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(RN16_BITS-1) ; i++)
-          debug << in[RN16_index+i].real() << " ";
+          debug << norm_in[RN16_index+i].real() << " ";
         debug << std::endl << "\t\t\t\t\t** RN16 samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -305,7 +309,7 @@ namespace gr
         if(RN16_index != -1)
         {
           std::cout << "│ Preamble detected!" << std::endl;
-          std::vector<float> RN16_bits = tag_detection(in, RN16_index, RN16_BITS-1);  // RN16_BITS includes one dummy bit
+          std::vector<float> RN16_bits = tag_detection(norm_in, RN16_index, RN16_BITS-1);  // RN16_BITS includes one dummy bit
 
           // write RN16_bits to the next block
           std::cout << "│ RN16=";
@@ -358,18 +362,18 @@ namespace gr
         debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
         debug << "\t\t\t\t\t** samples from gate **" << std::endl;
         for(int i=0 ; i<ninput_items[0] ; i++)
-          debug << in[i].real() << " ";
+          debug << norm_in[i].real() << " ";
         debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
 
         // detect preamble
-        int EPC_index = tag_sync(in, ninput_items[0]);
+        int EPC_index = tag_sync(norm_in, ninput_items[0]);
         #ifdef DEBUG_MESSAGE
         debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
         debug << "\t\t\t\t\t** EPC samples **" << std::endl;
         for(int i=0 ; i<n_samples_TAG_BIT*(EPC_BITS-1) ; i++)
-          debug << in[EPC_index+i].real() << " ";
+          debug << norm_in[EPC_index+i].real() << " ";
         debug << std::endl << "\t\t\t\t\t** EPC samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif
@@ -384,7 +388,7 @@ namespace gr
         if(EPC_index != -1)
         {
           std::cout << "│ Preamble detected!" << std::endl;
-          std::vector<float> EPC_bits = tag_detection(in, EPC_index, EPC_BITS-1);  // EPC_BITS includes one dummy bit
+          std::vector<float> EPC_bits = tag_detection(norm_in, EPC_index, EPC_BITS-1);  // EPC_BITS includes one dummy bit
 
           // convert EPC_bits from float to char in order to use Buettner's function
           std::cout << "│ EPC=";
@@ -442,6 +446,7 @@ namespace gr
         // process for GNU RADIO
         consumed = reader_state->n_samples_to_ungate;
       }
+      delete[] norm_in;
       consume_each(consumed);
       return WORK_CALLED_PRODUCE;
     }
