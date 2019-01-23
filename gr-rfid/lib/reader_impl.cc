@@ -276,9 +276,11 @@ namespace gr
         case SEND_QUERY:
         //GR_LOG_INFO(d_debug_logger, "QUERY");
         //GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
-        log.open("aa", std::ios::app);
+        log.open("debug_message", std::ios::app);
         log << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
         log << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
+        log.close();
+        std::cout << std::endl << "[" << reader_state->reader_stats.cur_inventory_round << "_" << reader_state->reader_stats.cur_slot_number << "] ";
         reader_state->reader_stats.n_queries_sent +=1;
 
         // Controls the other two blocks
@@ -307,8 +309,11 @@ namespace gr
         memcpy(&out[written], &cw_query[0], sizeof(float) * cw_query.size() );
         written+=cw_query.size();
 
-        std::cout << "│ Send Query | Q= " << q_value << std::endl;
-        std::cout << "├──────────────────────────────────────────────────" << std::endl;
+        log.open("debug_message", std::ios::app);
+        log << "│ Send Query | Q= " << q_value << std::endl;
+        log << "├──────────────────────────────────────────────────" << std::endl;
+        log.close();
+        std::cout << "Query(Q=" << q_value << ") ";
 
         // Return to IDLE
         reader_state->gen2_logic_status = IDLE;
@@ -345,8 +350,11 @@ namespace gr
           }
 
           reader_state->reader_stats.ack_sent.push_back((std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str());
-          std::cout << "│ Send ACK" << std::endl;
-          std::cout << "├──────────────────────────────────────────────────" << std::endl;
+          log.open("debug_message", std::ios::app);
+          log << "│ Send ACK" << std::endl;
+          log << "├──────────────────────────────────────────────────" << std::endl;
+          log.close();
+          std::cout << "ACK ";
 
           consumed = ninput_items[0];
           reader_state->gen2_logic_status = SEND_CW;
@@ -363,7 +371,10 @@ namespace gr
         case SEND_QUERY_REP:
         //GR_LOG_INFO(d_debug_logger, "SEND QUERY_REP");
         //GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
-        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
+        log.open("debug_message", std::ios::app);
+        log << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
+        log.close();
+        std::cout << std::endl << "[" << reader_state->reader_stats.cur_inventory_round << "_" << reader_state->reader_stats.cur_slot_number << "] ";
 
         // Controls the other two blocks
         reader_state->decoder_status = DECODER_DECODE_RN16;
@@ -376,8 +387,11 @@ namespace gr
         memcpy(&out[written], &cw_query[0], sizeof(float) * cw_query.size());
         written+=cw_query.size();
 
-        std::cout << "│ Send QueryRep" << std::endl;
-        std::cout << "├──────────────────────────────────────────────────" << std::endl;
+        log.open("debug_message", std::ios::app);
+        log << "│ Send QueryRep" << std::endl;
+        log << "├──────────────────────────────────────────────────" << std::endl;
+        log.close();
+        std::cout << "QueryRep ";
 
         reader_state->gen2_logic_status = IDLE;    // Return to IDLE
         break;
