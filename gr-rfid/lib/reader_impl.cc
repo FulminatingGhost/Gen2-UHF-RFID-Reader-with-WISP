@@ -233,6 +233,8 @@ namespace gr
 
       int q_value;
 
+      std::ofstream log;
+
       consumed = ninput_items[0];
       FILE* file = fopen("a", "w"); fprintf(file, "a"); fclose(file); // dummy code (want to remove)
 
