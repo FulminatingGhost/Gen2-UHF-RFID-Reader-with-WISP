@@ -276,8 +276,9 @@ namespace gr
         case SEND_QUERY:
         //GR_LOG_INFO(d_debug_logger, "QUERY");
         //GR_LOG_INFO(d_debug_logger, "INVENTORY ROUND : " << reader_state->reader_stats.cur_inventory_round << " SLOT NUMBER : " << reader_state->reader_stats.cur_slot_number);
-        std::cout << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
-        std::cout << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
+        log.open("aa", std::ios::app);
+        log << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
+        log << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
         reader_state->reader_stats.n_queries_sent +=1;
 
         // Controls the other two blocks
