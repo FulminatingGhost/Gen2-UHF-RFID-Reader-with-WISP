@@ -75,7 +75,7 @@ namespace gr
       ninput_items_required[0] = noutput_items;
     }
 
-    int tag_decoder_impl::tag_sync(const gr_complex* in, int size)
+    int tag_decoder_impl::tag_sync(float* norm_in, int size)
     // This method searches the preamble and returns the start index of the tag data.
     // If the correlation value exceeds the threshold, it returns the start index of the tag data.
     // Else, it returns -1.
@@ -94,13 +94,13 @@ namespace gr
         // calculate average_amp (threshold)
         float average_amp = 0.0f;
         for(int j=0 ; j<win_size ; j++)
-          average_amp += in[i+j].real();
+          average_amp += norm_in[i+j];
         average_amp /= win_size;
 
         // calculate normalize_factor
         float standard_deviation = 0.0f;
         for(int j=0 ; j<win_size ; j++)
-          standard_deviation += pow(in[i+j].real() - average_amp, 2);
+          standard_deviation += pow(norm_in[i+j] - average_amp, 2);
         standard_deviation /= win_size;
         standard_deviation = sqrt(standard_deviation);
 
@@ -111,7 +111,7 @@ namespace gr
           for(int k=0 ; k<(n_samples_TAG_BIT/2.0) ; k++)
           {
             for(int m=0 ; m<2 ; m++)  // m: index of TAG_PREAMBLE type
-                corr_candidates[m] += TAG_PREAMBLE[m][j] * ((in[i + j*(int)(n_samples_TAG_BIT/2.0) + k].real() - average_amp) / standard_deviation);
+                corr_candidates[m] += TAG_PREAMBLE[m][j] * ((norm_in[i + j*(int)(n_samples_TAG_BIT/2.0) + k] - average_amp) / standard_deviation);
           }
         }
 
@@ -133,7 +133,7 @@ namespace gr
       debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
       debug << "\t\t\t\t\t** preamble samples **" << std::endl;
       for(int i=0 ; i<win_size ; i++)
-        debug << in[max_index+i].real() << " ";
+        debug << in[max_index+i] << " ";
       debug << std::endl << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
       debug.close();
       #endif
@@ -143,7 +143,7 @@ namespace gr
       else return -1;
     }
 
-    int tag_decoder_impl::determine_first_mask_level(const gr_complex* in, int index)
+    int tag_decoder_impl::determine_first_mask_level(float* norm_in, int index)
     // index: start point of "tag data", do not decrease half bit!
     {
       float max_max_corr = 0.0f;
@@ -152,7 +152,7 @@ namespace gr
       for(int k=0 ; k<2 ; k++)
       {
         float max_corr = 0.0f;
-        int max_index = decode_single_bit(in, index, k, &max_corr);
+        int max_index = decode_single_bit(norm_in, index, k, &max_corr);
 
         if(max_corr > max_max_corr)
         {
@@ -165,7 +165,7 @@ namespace gr
       return max_max_index;
     }
 
-    int tag_decoder_impl::decode_single_bit(const gr_complex* in, int index, int mask_level, float* ret_corr)
+    int tag_decoder_impl::decode_single_bit(float* norm_in, int index, int mask_level, float* ret_corr)
     // index: start point of "tag data", do not decrease half bit!
     // mask_level: start level of "decoding bit", do not put start level of "previoud bit"! (-1)low start, (1)high start
     // corr: return max_corr
@@ -184,7 +184,7 @@ namespace gr
       {
         float average_amp = 0.0f;
         for(int j=-(n_samples_TAG_BIT*0.5) ; j<(n_samples_TAG_BIT*1.5) ; j++)
-          average_amp += in[index+j].real();
+          average_amp += norm_in[index+j];
         average_amp /= (2*n_samples_TAG_BIT);
 
         float corr = 0.0f;
@@ -196,7 +196,7 @@ namespace gr
           else if(j < n_samples_TAG_BIT) idx = 2;
           else idx = 3;
 
-          corr += masks[mask_level][i][idx] * (in[index+j].real() - average_amp);
+          corr += masks[mask_level][i][idx] * (norm_in[index+j] - average_amp);
         }
 
         if(corr > max_corr)
@@ -210,7 +210,7 @@ namespace gr
       return max_index;
     }
 
-    std::vector<float> tag_decoder_impl::tag_detection(const gr_complex* in, int index, int n_expected_bit)
+    std::vector<float> tag_decoder_impl::tag_detection(float* norm_in, int index, int n_expected_bit)
     {
       std::vector<float> decoded_bits;
 
@@ -226,7 +226,7 @@ namespace gr
         for(int j=0 ; j<(SHIFT_SIZE*2 + 1) ; j++)
         {
           float corr = 0.0f;
-          int index = decode_single_bit(in, idx+j-SHIFT_SIZE, mask_level, &corr);
+          int index = decode_single_bit(norm_in, idx+j-SHIFT_SIZE, mask_level, &corr);
 
           if(corr > max_corr)
           {
@@ -243,7 +243,7 @@ namespace gr
         else debug << " (low start)" << std::endl;
         debug << "\t\t\t\t\t** shifted bit samples **" << std::endl;
         for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
-          debug << in[i].real() << " ";
+          debug << norm_in[i] << " ";
         debug << std::endl << "\t\t\t\t\t** shifted bit samples **" << std::endl << std::endl << std::endl << std::endl;
         debug.close();
         #endif

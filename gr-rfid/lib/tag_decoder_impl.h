@@ -43,10 +43,10 @@ namespace gr {
         FILE *preamble_fp;
         int success_count;
 
-        int tag_sync(const gr_complex* in, int size);
-        int determine_first_mask_level(const gr_complex* in, int index);
-        int decode_single_bit(const gr_complex* in, int index, int mask_level, float* ret_corr);
-        std::vector<float> tag_detection(const gr_complex* in, int index, int n_expected_bit);
+        int tag_sync(float* in, int size);
+        int determine_first_mask_level(float* in, int index);
+        int decode_single_bit(float* in, int index, int mask_level, float* ret_corr);
+        std::vector<float> tag_detection(float* in, int index, int n_expected_bit);
         int check_crc(char * bits, int num_bits);
 
       public:
