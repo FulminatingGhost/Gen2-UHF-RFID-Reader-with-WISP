@@ -133,7 +133,7 @@ namespace gr
       debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
       debug << "\t\t\t\t\t** preamble samples **" << std::endl;
       for(int i=0 ; i<win_size ; i++)
-        debug << normalize_factorin[max_index+i] << " ";
+        debug << norm_in[max_index+i] << " ";
       debug << std::endl << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
       debug.close();
       #endif
