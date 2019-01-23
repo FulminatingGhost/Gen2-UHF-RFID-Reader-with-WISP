@@ -149,9 +149,12 @@ namespace gr
             n_samples++;
 
             #ifdef DEBUG_MESSAGE
-            debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
-            debug << "sample_ampl= " << sample_ampl << ", sample_thresh= " << sample_thresh << ", signal_state= " << signal_state << std::endl;
-            debug.close();
+            if(signal_state == NEG_EDGE)
+            {
+              debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
+              debug << "sample_ampl= " << sample_ampl << ", sample_thresh= " << sample_thresh << ", signal_state= " << signal_state << std::endl;
+              debug.close();
+            }
             #endif
 
             // Potitive edge -> Negative edge
@@ -172,9 +175,12 @@ namespace gr
             }
 
             #ifdef DEBUG_MESSAGE
-            debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
-            debug << "n_samples= " << n_samples << ", n_samples_T1= " << n_samples_T1 << ", signal_state= " << signal_state << ", num_pulses= " << num_pulses << ", NUM_PULSES_COMMAND= " << NUM_PULSES_COMMAND << std::endl;
-            debug.close();
+            if(signal_state == NEG_EDGE)
+            {
+              debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
+              debug << "\tn_samples= " << n_samples << ", n_samples_T1= " << n_samples_T1 << ", signal_state= " << signal_state << ", num_pulses= " << num_pulses << ", NUM_PULSES_COMMAND= " << NUM_PULSES_COMMAND << std::endl;
+              debug.close();
+            }
             #endif
 
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
