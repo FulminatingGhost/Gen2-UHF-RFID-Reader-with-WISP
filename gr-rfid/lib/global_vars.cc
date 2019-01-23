@@ -52,6 +52,10 @@ namespace gr {
       reader_state-> reader_stats.cur_slot_number     = 1;
 
       gettimeofday (&reader_state-> reader_stats.start, NULL);
+
+      #ifdef DEBUG_MESSAGE
+      std::ofstream debug;
+      #endif
     }
   } /* namespace rfid */
 } /* namespace gr */
