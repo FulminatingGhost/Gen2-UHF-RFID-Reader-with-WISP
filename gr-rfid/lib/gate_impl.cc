@@ -148,6 +148,12 @@ namespace gr
 
             n_samples++;
 
+            #ifdef DEBUG_MESSAGE
+            debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
+            debug << "sample_ampl= " << sample_ampl << ", sample_thresh= " << sample_thresh << ", signal_state= " << signal_state << std::endl;
+            debug.close();
+            #endif
+
             // Potitive edge -> Negative edge
             if( sample_ampl < sample_thresh && signal_state == POS_EDGE)
             {
