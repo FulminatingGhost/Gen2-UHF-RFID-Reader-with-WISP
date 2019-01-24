@@ -284,6 +284,7 @@ namespace gr
 
       std::ofstream parallel("parallel", std::ios::app);
 
+      parallel << "\t\t\t\t\t** local density **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
         int current_local_density = -1;
@@ -296,10 +297,9 @@ namespace gr
         parallel << current_local_density << " ";
         local_density.push_back(current_local_density);
       }
-      std::cout << "for loop finish" << std::endl;
+      parallel << std::endl << std::endl;
 
       parallel.close();
-      std::cout << "ofstream close finish" << std::endl;
 
       center_idx.push_back(1);
       center_idx.push_back(2);
@@ -568,7 +568,7 @@ namespace gr
           log << "└──────────────────────────────────────────────────" << std::endl;
           if(reader_state->reader_stats.cur_inventory_round > MAX_NUM_QUERIES)
             reader_state-> status = TERMINATED;
-            
+
           reader_state->gen2_logic_status = SEND_QUERY;
         }
         else
