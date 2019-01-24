@@ -24,7 +24,7 @@ Get more information at below WISP wiki website.
  * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).zip
  * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).tar.gz
 
-4. Unzip the ".zip" of ".tar.gz" file.
+4. Unzip the ".zip" or ".tar.gz" file.
  * unzip *
  * tar -xvzf *
  
@@ -125,7 +125,7 @@ These files can be plotted by graphic interface. Use below instruction. The blue
  * (ex) gr_plot_iq -B 100000 matched_filter
 
 ## Tested on:
-Ubuntu 16.04 64-bit
+Ubuntu 16.04 64-bit  
 GNU Radio 3.7.10.1
 
 ## If you use this software please cite:
