@@ -288,6 +288,8 @@ namespace gr
       for(int i=0 ; i<ninput_items[0] ; i++)
         norm_in[i] = std::sqrt(std::norm(in[i]));
 
+      test();
+
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
