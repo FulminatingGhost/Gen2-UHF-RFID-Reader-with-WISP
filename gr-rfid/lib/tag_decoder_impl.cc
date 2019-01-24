@@ -88,7 +88,6 @@ namespace gr
       int max_index = 0;
 
       // compare all samples with sliding
-      //for(int i=0 ; i<(n_samples_TAG_BIT*EXTRA_BITS)-win_size ; i++)  // i: start point
       for(int i=0 ; i<size-win_size ; i++)  // i: start point
       {
         // calculate average_amp (threshold)
@@ -129,13 +128,15 @@ namespace gr
       }
 
       #ifdef DEBUG_MESSAGE
-      std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
-      debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
-      debug << "\t\t\t\t\t** preamble samples **" << std::endl;
-      for(int i=0 ; i<win_size ; i++)
-        debug << norm_in[max_index+i] << " ";
-      debug << std::endl << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
-      debug.close();
+      {
+        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+        debug << "threshold= " << threshold << ", corr= " << max_corr << ", index=" << max_index << std::endl;
+        debug << "\t\t\t\t\t** preamble samples **" << std::endl;
+        for(int i=0 ; i<win_size ; i++)
+          debug << norm_in[max_index+i] << " ";
+        debug << std::endl << "\t\t\t\t\t** preamble samples **" << std::endl << std::endl << std::endl << std::endl;
+        debug.close();
+      }
       #endif
 
       // check if correlation value exceeds threshold
@@ -144,7 +145,10 @@ namespace gr
     }
 
     int tag_decoder_impl::determine_first_mask_level(float* norm_in, int index)
-    // index: start point of "tag data", do not decrease half bit!
+    // This method searches whether the first bit starts with low level or high level.
+    // If the first bit starts with low level, it returns -1.
+    // If the first bit starts with high level, it returns 0.
+    // index: start point of "data bit", do not decrease half bit!
     {
       float max_max_corr = 0.0f;
       int max_max_index = -1;
@@ -166,13 +170,13 @@ namespace gr
     }
 
     int tag_decoder_impl::decode_single_bit(float* norm_in, int index, int mask_level, float* ret_corr)
-    // index: start point of "tag data", do not decrease half bit!
-    // mask_level: start level of "decoding bit", do not put start level of "previoud bit"! (-1)low start, (1)high start
-    // corr: return max_corr
+    // This method decodes single bit and returns the decoded value and the correlation score.
+    // index: start point of "data bit", do not decrease half bit!
+    // mask_level: start level of "decoding bit". (-1)low level start, (1)high level start.
     {
       const float masks[2][2][4] = { // first, last elements are extra bits. second, third elements are real signal.
-        {{1, -1, 1, -1}, {1, -1, -1, 1}}, // low start
-        {{-1, 1, -1, 1}, {-1, 1, 1, -1}}  // high start
+        {{1, -1, 1, -1}, {1, -1, -1, 1}}, // low level start
+        {{-1, 1, -1, 1}, {-1, 1, 1, -1}}  // high level start
       };
 
       if(mask_level == -1) mask_level = 0;  // convert for indexing
@@ -180,21 +184,22 @@ namespace gr
       float max_corr = 0.0f;
       int max_index = -1;
 
+      float average_amp = 0.0f;
+      for(int j=-(n_samples_TAG_BIT*0.5) ; j<(n_samples_TAG_BIT*1.5) ; j++)
+        average_amp += norm_in[index+j];
+      average_amp /= (2*n_samples_TAG_BIT);
+
+      // compare with two masks (0 or 1)
       for(int i=0 ; i<2 ; i++)
       {
-        float average_amp = 0.0f;
-        for(int j=-(n_samples_TAG_BIT*0.5) ; j<(n_samples_TAG_BIT*1.5) ; j++)
-          average_amp += norm_in[index+j];
-        average_amp /= (2*n_samples_TAG_BIT);
-
         float corr = 0.0f;
         for(int j=-(n_samples_TAG_BIT*0.5) ; j<(n_samples_TAG_BIT*1.5) ; j++)
         {
           int idx;
-          if(j < 0) idx = 0;
-          else if(j < (n_samples_TAG_BIT*0.5)) idx = 1;
-          else if(j < n_samples_TAG_BIT) idx = 2;
-          else idx = 3;
+          if(j < 0) idx = 0;                            // first section (trailing half bit of the previous bit)
+          else if(j < (n_samples_TAG_BIT*0.5)) idx = 1; // second section (leading half bit of the data bit)
+          else if(j < n_samples_TAG_BIT) idx = 2;       // third section (trailing half bit of the data bit)
+          else idx = 3;                                 // forth section (leading half bit of the later bit)
 
           corr += masks[mask_level][i][idx] * (norm_in[index+j] - average_amp);
         }
@@ -211,18 +216,22 @@ namespace gr
     }
 
     std::vector<float> tag_decoder_impl::tag_detection(float* norm_in, int index, int n_expected_bit)
+    // This method decodes n_expected_bit of data by using previous methods, and returns the vector of the decoded data.
+    // index: start point of "data bit", do not decrease half bit!
     {
       std::vector<float> decoded_bits;
 
       int mask_level = determine_first_mask_level(norm_in, index);
       int shift = 0;
+
       for(int i=0 ; i<n_expected_bit ; i++)
       {
-        int idx = index + i*n_samples_TAG_BIT + shift;
+        int idx = index + i*n_samples_TAG_BIT + shift;  // start point of decoding bit with shifting
         float max_corr = 0.0f;
         int max_index;
         int curr_shift;
 
+        // shifting from idx-SHIFT_SIZE to idx+SHIFT_SIZE
         for(int j=0 ; j<(SHIFT_SIZE*2 + 1) ; j++)
         {
           float corr = 0.0f;
@@ -232,26 +241,28 @@ namespace gr
           {
             max_corr = corr;
             max_index = index;
-            curr_shift = j - SHIFT_SIZE;
+            curr_shift = j - SHIFT_SIZE;  // find the best current shift value
           }
         }
 
         #ifdef DEBUG_MESSAGE
-        std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
-        debug << "[" << i+1 << "th bit] corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
-        if(mask_level) debug << " (high start)" << std::endl;
-        else debug << " (low start)" << std::endl;
-        debug << "\t\t\t\t\t** shifted bit samples **" << std::endl;
-        for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
-          debug << norm_in[i] << " ";
-        debug << std::endl << "\t\t\t\t\t** shifted bit samples **" << std::endl << std::endl << std::endl << std::endl;
-        debug.close();
+        {
+          std::ofstream debug((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
+          debug << "[" << i+1 << "th bit] corr=" << max_corr << ", curr_shift=" << curr_shift << ", shift=" << shift << ", decoded_bit=" << max_index;
+          if(mask_level) debug << " (high start)" << std::endl;
+          else debug << " (low start)" << std::endl;
+          debug << "\t\t\t\t\t** shifted bit samples **" << std::endl;
+          for(int j=idx-SHIFT_SIZE ; j<idx+n_samples_TAG_BIT+SHIFT_SIZE ; j++)
+            debug << norm_in[i] << " ";
+          debug << std::endl << "\t\t\t\t\t** shifted bit samples **" << std::endl << std::endl << std::endl << std::endl;
+          debug.close();
+        }
         #endif
 
-        if(max_index) mask_level *= -1; // change mask_level when the decoded bit is 1
+        if(max_index) mask_level *= -1; // change mask_level(start level of the next bit) when the decoded bit is 1
 
         decoded_bits.push_back(max_index);
-        shift += curr_shift;
+        shift += curr_shift;  // update the shift value
       }
 
       return decoded_bits;
@@ -273,6 +284,7 @@ namespace gr
       std::ofstream debug;
       #endif
 
+      // convert from complex value to float value
       for(int i=0 ; i<ninput_items[0] ; i++)
         norm_in[i] = std::sqrt(std::norm(in[i]));
 
@@ -363,17 +375,13 @@ namespace gr
         {
           log.open("debug_message", std::ios::app);
           log << "│ Preamble detection fail.." << std::endl;
-          std::cout << "\t\t\t\t\tFAIL!!";
+          std::cout << "\t\t\t\t\tPreamble FAIL!!";
 
           reader_state->reader_stats.cur_slot_number++;
           if(reader_state->reader_stats.cur_slot_number > reader_state->reader_stats.max_slot_number)
           {
             reader_state->reader_stats.cur_inventory_round ++;
             reader_state->reader_stats.cur_slot_number = 1;
-
-            //if (P_DOWN == true)
-            //  reader_state->gen2_logic_status = POWER_DOWN;
-            //else
 
             log << "└──────────────────────────────────────────────────" << std::endl;
             reader_state->gen2_logic_status = SEND_QUERY;
@@ -512,10 +520,6 @@ namespace gr
         {
           reader_state->reader_stats.cur_inventory_round ++;
           reader_state->reader_stats.cur_slot_number = 1;
-
-          //if (P_DOWN == true)
-          //  reader_state->gen2_logic_status = POWER_DOWN;
-          //else
 
           log << "└──────────────────────────────────────────────────" << std::endl;
           reader_state->gen2_logic_status = SEND_QUERY;

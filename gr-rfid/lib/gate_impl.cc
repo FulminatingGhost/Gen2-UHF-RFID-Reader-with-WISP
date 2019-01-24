@@ -98,12 +98,6 @@ namespace gr
       float sample_ampl = 0;
       int written = 0;
 
-      /*#ifdef DEBUG_MESSAGE
-      std::ofstream debug;
-      #endif*/
-
-      //std::cout << "PW samples : " << n_samples_PW << std::endl;
-
       if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
         reader_state-> reader_stats.tag_reads.size() > NUMBER_UNIQUE_TAGS) &&
         reader_state-> status != TERMINATED)
@@ -148,15 +142,6 @@ namespace gr
 
             n_samples++;
 
-            /*#ifdef DEBUG_MESSAGE
-            if(signal_state == NEG_EDGE)
-            {
-              debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
-              debug << "sample_ampl= " << sample_ampl << ", sample_thresh= " << sample_thresh << ", signal_state= " << signal_state << std::endl;
-              debug.close();
-            }
-            #endif*/
-
             // Potitive edge -> Negative edge
             if( sample_ampl < sample_thresh && signal_state == POS_EDGE)
             {
@@ -174,15 +159,6 @@ namespace gr
               n_samples = 0;
             }
 
-            /*#ifdef DEBUG_MESSAGE
-            if(signal_state == NEG_EDGE)
-            {
-              debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_gate").c_str(), std::ios::app);
-              debug << "\tn_samples= " << n_samples << ", n_samples_T1= " << n_samples_T1 << ", signal_state= " << signal_state << ", num_pulses= " << num_pulses << ", NUM_PULSES_COMMAND= " << NUM_PULSES_COMMAND << std::endl;
-              debug.close();
-            }
-            #endif*/
-
             if(n_samples > n_samples_T1 && signal_state == POS_EDGE && num_pulses > NUM_PULSES_COMMAND)
             {
               //GR_LOG_INFO(d_debug_logger, "READER COMMAND DETECTED");
@@ -193,9 +169,6 @@ namespace gr
 
               reader_state->magn_squared_samples.push_back(std::norm(in[i] - dc_est));
               out[written] = in[i] - dc_est; // Remove offset from complex samples
-              //out[written] = gr_complex(std::abs((in[i] - dc_est).imag()), 0);
-              //out[written] = std::norm(in[i] - dc_est);
-              //out[written] = std::abs(std::sqrt(std::norm(in[i])) - std::sqrt(std::norm(dc_est)));
               written++;
 
               num_pulses = 0;
@@ -208,9 +181,6 @@ namespace gr
 
             reader_state->magn_squared_samples.push_back(std::norm(in[i] - dc_est));
             out[written] = in[i] - dc_est; // Remove offset from complex samples
-            //out[written] = std::norm(in[i] - dc_est);
-            //out[written] = gr_complex(std::abs((in[i] - dc_est).imag()), 0);
-            //out[written] = std::abs(std::sqrt(std::norm(in[i])) - std::sqrt(std::norm(dc_est)));
 
             written++;
             if (n_samples >= reader_state->n_samples_to_ungate)
