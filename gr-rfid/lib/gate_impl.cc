@@ -98,14 +98,6 @@ namespace gr
       float sample_ampl = 0;
       int written = 0;
 
-      if( (reader_state-> reader_stats.n_queries_sent   > MAX_NUM_QUERIES ||
-        reader_state-> reader_stats.tag_reads.size() > NUMBER_UNIQUE_TAGS) &&
-        reader_state-> status != TERMINATED)
-      {
-        reader_state-> status = TERMINATED;
-        //GR_LOG_INFO(d_logger, "Termination");
-      }
-
         // Gate block is controlled by the Gen2 Logic block
       if(reader_state->gate_status == GATE_SEEK_EPC)
       {

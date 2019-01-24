@@ -425,6 +425,9 @@ namespace gr
             reader_state->reader_stats.cur_slot_number = 1;
 
             log << "└──────────────────────────────────────────────────" << std::endl;
+            if(reader_state->reader_stats.cur_inventory_round > MAX_NUM_QUERIES)
+              reader_state-> status = TERMINATED;
+
             reader_state->gen2_logic_status = SEND_QUERY;
           }
           else
@@ -563,6 +566,9 @@ namespace gr
           reader_state->reader_stats.cur_slot_number = 1;
 
           log << "└──────────────────────────────────────────────────" << std::endl;
+          if(reader_state->reader_stats.cur_inventory_round > MAX_NUM_QUERIES)
+            reader_state-> status = TERMINATED;
+            
           reader_state->gen2_logic_status = SEND_QUERY;
         }
         else
