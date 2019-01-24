@@ -1,101 +1,140 @@
-# README file is not updated
-# These codes are in process. These are not ready to release.
+# Gen2 UHF RFID Reader with WISP
+This program is revised version of the Gen2 UHF RFID Reader (https://github.com/nkargas/Gen2-UHF-RFID-Reader) developed by Nikos Kargas (https://github.com/nkargas). It can communicate with the programmable RFID Tag with FM0 encoding and 40kHz data rate.
 
-# Belows are Nikos Kargas's original README.md
-# Gen2 UHF RFID Reader
-This is a Gen2 UHF RFID Reader. It is able to identify commercial Gen2 RFID Tags with FM0 line coding and 40kHz data rate (BLF), and extract their EPC message. It requires USRPN200 and was tested with a single front-end card (RFX900).  
-Developed by Nikos Kargas in the context of his MSc thesis, School of Electronic & Computer Engineering, Technical Univ. of Crete.  
+## Hardware
+ * 1x USRP N210
+ * 1x SFX daughterboard
+ * 2x circular polarized antennas
 
-The project was initially based on the RFID Gen2 Reader available at https://github.com/ransford/gen2_rfid (previously at https://www.cgran.org/wiki/Gen2 Contributor: Michael Buettner). In order to make it compatible with the latest version of GNU Radio, UHD as well as USRPN200, I decided to write a Gen2 Reader from scratch. The reader borrows elements from the software developed by Buettner, i.e. Data flow: Gate -> Decoder -> Reader as well as the conception regarding the detection of the reader commands. CRC calculation and checking functions were also adapted from https://www.cgran.org/browser/projects/gen2_rfid/.
-
-### Implemented GNU Radio Blocks:
-
-- Gate : Responsible for reader command detection.  
-- Tag decoder : Responsible for frame synchronization, channel estimation, symbol period estimation and detection.  
-- Reader (Gen2 Logic) : Create/send reader commands.
+### Wireless Identification and Sensing Platform (WISP)
+We use WISP(MSP430) as an RFID tag. Normal data rate of WISP is 460kHz, but we modified to 40kHz in order to communicate with this program. Visit below and install the 40kHz version on your WISP tag.
+ * https://github.com/whitecloudy/wisp5_436kHz-40kHz/tree/40kHz
+ 
+Get more information at below WISP wiki website.
+ * http://wisp5.wispsensor.net
 
 ## Installation
+1. Install the UHD driver and GNU Radio program. Use below instruction to check the success of the hardware installation.
+ * uhd_find_devices
 
-- install log4cpp (http://log4cpp.sourceforge.net/)
-- install UHD driver + GNU Radio using **wget http://www.sbrac.org/files/build-gnuradio && chmod a+x ./build-gnuradio && ./build-gnuradio**
-- cd Gen2-UHF-RFID-Reader/gr-rfid/  
-- mkdir build  
-- cd build/  
-- cmake ../ (logging should be enabled)  
-- sudo make install  
-- sudo ldconfig  
+2. Visit below and check the latest release of this program. Copy the link of the source code.
+ * https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/releases
+
+3. Download the source code.
+ * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).zip
+ * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).tar.gz
+
+4. Unzip the ".zip" of ".tar.gz" file.
+ * unzip *
+ * tar -xvzf *
+ 
+5. Execute the script file "init.sh" for initial build.
+ * ./init.sh
+ 
+or type the below instructions manually.
+ * cd gr-rfid
+ * mkdir build
+ * cd build
+ * cmake ../
+ * make
+ * make test
+ * sudo make install
+ * sudo ldconfig
+ * cd ../misc
+ * mkdir data
+ * cd data
+ * touch source matched_filter gate decoder
+ * cd ../../apps
 
 ## Configuration
+There are several variables you can modify in order to fit your experimental environment.
 
-- Set USRPN200 address in apps/reader.py (default: 192.168.10.2)
-- Set frequency in apps/reader.py (default: 910MHz)
-- Set tx amplitude in apps/reader.py (default: 0.1)
-- Set rx gain in apps/reader.py (default: 20)
-- Set maximum number of queries in include/global_vars.h (default:1000)
-- Set number of inventory round slots in include/global_vars.h (default: 0)
+### gr-rfid/apps/reader.py
+ * line 13: DEBUG  
+True: execute the program from file source. (debugging mode)  
+False : execute the program from USRP reader. (default)
 
-## How to run
+ * line 53~59:  
+dac_rate: DAC rate (default: 1MS/s)  
+adc_rate: ADC rate (default: 2MS/s)  
+decim: downsampling factor (default: 1)  
+ampl: output signal amplitude (default: 0.55)  
+freq: modulation frequency (default: 910MHz)  
+rx_gain: RX gain  
+tx_gain: TX gain
 
-- Real time execution:  
-cd Gen2-UHF-RFID-Reader/gr-rfid/apps/    
-sudo GR_SCHEDULER=STS nice -n -20 python ./reader.py     
-After termination, part of EPC message (hex value of EPC[104:111]) of identified Tags is printed.  
+ * line 61~62:  
+Change addr value with the address of your USRP reader. (default: 192.168.1.2)
 
-- Offline:  
-    Change DEBUG variable in apps/reader.py to TRUE (A test file already exists named file_source_test).  
-    The reader works with offline traces without using a USRP.  
-    The output after running the software with test file is:  
-    
-    | Number of queries/queryreps sent : 71  
-    | Current Inventory round : 72  
+### gr-rfid/include/global_vars.h
+ * line 29: DEBUG_MESSAGE  
+Annotate this line, if you don't want to make the debug files. (dafault: exist)
 
-    | Correctly decoded EPC : 70  
-    | Number of unique tags : 1  
-    | Tag ID : 27  Num of reads : 70  
+ * line 75: FIXED_Q  
+The number of slot is fixed by 2^(FIXED_Q). (default FIXED_Q: 0 / default slot number: 1)
 
+ * line 79: MAX_NUM_QUERIES  
+The program stops after sending this amount of queries. (dafault: 100000)
 
-    #### Output files 
-    
-    /misc/data/source  
-    /misc/data/matched_filter  
-    /misc/data/gate 
-    /misc/data/decoder  
-    /misc/data/reader
-    
-    #### Plot using Octave/MATLAB
-    /misc/code/plot_signal.m       
-    
-## Logging
+ * line 159: result_file_path  
+Set the name of the result file. You have to change reader.sh file also. (default: result)
 
-- Configuration file : /home/username/.gnuradio/config.conf  
-    Edit the above file and add the following lines  
+ * line 161: debug_message  
+Set the name of the folder which saves the debug files. You have to change reader.sh file also. (dafault: debug_data/)
 
-    [LOG]  
-    debug_file = /PathToLogFile/Filename  
-    debug_level = info  
-    
-    Logging may cause latency issues if it is enabled during real time execution. However, it can be used with offline traces.
-    
-## Hardware:
+## Execution
+Execute the "gr-rfid/apps/reader.py" python file. You must delete the "debug_data" folder before the every execution, because the program does not automatically remove the debug files from the previous execution. For convenience, there is a script file which automatically delete the unnecessary files. Use "reader.sh" rather than directly executing "reader.py".
+ * ./reader.sh
 
-  - 1x USRPN200/N210  
-  - 1x RFX900 daughterboard  
-  - 2x circular polarized antennas  
-  
-### Update:
+If you made any change in ".cc" or ".h" file, you must rebuild the program. Execute the script file "build.sh". You don't need to rebuild the program when you only modify the "reader.py" file.
+ * ./build.sh
+ 
+or type the below instructions manually.
+ * cd ../build && make && make test && sudo make install && sudo ldconfig && cd ../apps
 
-To run with a SBX daugherboard, uncomment the line #self.source.set_auto_dc_offset(False) in reader.py file.
+When debugging mode, rename the "gr-rfid/misc/data/source" file to "file_source". Don't forget to make new "source" file after renaming.
+ * touch source
 
-14/12/15: Fixed a small issue in tag decoding. 
+If you want to reenact the execution, backup the "source" file in somewhere. You can easily reenact the execution by renaming file name to "file_source".
+
+## Output
+As the result of the execution, below files are created.
+
+### Text File
+ * gr-rfid/apps/debug_message  
+Logs the flow of the program. It includes decoded RN16 bits and EPC bits.
+ * gr-rfid/apps/result  
+Logs the result of the program. It includes the detected tag IDs and the number of reads.
+ * gr-rfid/apps/debug_data/(inventory_round)_(slot_number)  
+Logs the squared normalized value of samples from each inventory round and slot number. It includes detailed flow of decoding process.
+ * gr-rfid/apps/debug_data/(inventory_round)_(slot_number)_iq  
+Logs the real and imaginary value of samples from each inventory round and slot number.
+
+### Plot File
+ * gr-rfid/misc/data/source  
+Logs the all received samples. You should backup this file in order to reenact the execution.
+ * gr-rfid/misc/data/matched_filter  
+Logs the processed received samples. These samples are theinput of the reader block.
+ * gr-rfid/misc/data/gate  
+Logs the output of the gate block. These samples are the input of the tag_decoder block.
+ * gr-rfid/misc/data/file_sink  
+Logs the transmitted samples.
+
+These files can be plotted by graphic interface. Use below instruction. The blue line figures the real value, and the red line figures the imaginary value.
+ * gr_plot_iq -B (sample_window) (file_name)
+ * (ex) gr_plot_iq -B 100000 matched_filter
 
 ## Tested on:
-  Ubuntu 14.04 64-bit  
-  GNU Radio 3.7.4
-  
-## For more information:
+Ubuntu 16.04 64-bit
+GNU Radio 3.7.10.1
+
+## If you use this software please cite:
 N. Kargas, F. Mavromatis and A. Bletsas, "Fully-Coherent Reader with Commodity SDR for Gen2 FM0 and Computational RFID", IEEE Wireless Communications Letters (WCL), Vol. 4, No. 6, pp. 617-620, Dec. 2015. 
 
-## Contact:
-  Nikos Kargas (e-mail1: cpznick@gmail.com email2: karga005@umn.edu)  
+## Contacts
+### Revised Version
+Jeong Sin-Gi (e-mail: jsgnwk@csi.skku.edu)  
+Computer Science and Intelligence Lab in Sungkyunkwan University, Suwon, Republic of Korea(ROK, South Korea).
 
-This research has been co-financed by the European Union (European Social Fund-ESF) and Greek national funds through the Operational Program Education and Lifelong Learning of the National Strategic Reference Framework (NSRF) - Research Funding Program: THALES-Investing in knowledge society through the European Social Fund.
+### Original Version
+Nikos Kargas (e-mail1: cpznick@gmail.com e-mail2: karga005@umn.edu)
