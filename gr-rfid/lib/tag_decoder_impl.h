@@ -49,8 +49,6 @@ namespace gr {
         std::vector<float> tag_detection(float* in, int index, int n_expected_bit);
         int check_crc(char * bits, int num_bits);
 
-        void test(void);
-
       public:
         tag_decoder_impl(int sample_rate, std::vector<int> output_sizes);
         ~tag_decoder_impl();
