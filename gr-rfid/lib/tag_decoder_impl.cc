@@ -268,6 +268,44 @@ namespace gr
       return decoded_bits;
     }
 
+    // clustering algotirhm
+    float tag_decoder_impl::IQ_distance(const gr_complex p1, const gr_complex p2)
+    {
+      return std::sqrt(std::pow((p1.real() - p2.real()), 2) + std::pow((p1.imag() - p2.imag()), 2));
+    }
+
+    std::vector<int> tag_decoder_impl::clustering_algorithm(const gr_complex* in, const int size)
+    {
+      std::vector<int> center_idx;
+      std::vector<int> local_density;
+      std::vector<float> local_distance;
+
+      const float threshold = 0.005;
+
+      std::ofstream parallel("parallel", std::ios::app);
+
+      for(int i=0 ; i<size ; i++)
+      {
+        int current_local_density = -1;
+
+        for(int j=0 ; j<size ; j++)
+        {
+          if(IQ_distance(in[i], in[j]) < threshold) current_local_density++;
+        }
+
+        parallel << current_local_density << " ";
+        local_density.push_back(current_local_density);
+      }
+      std::cout << "for loop finish" << std::endl;
+
+      parallel.close();
+      std::cout << "ofstream close finish" << std::endl;
+
+      center_idx.push_back(1);
+      center_idx.push_back(2);
+      return center_idx;
+    }
+
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
@@ -291,6 +329,9 @@ namespace gr
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
+        std::vector<int> center = clustering_algorithm(in, ninput_items[0]);
+        std::cout << "finish correctly" << std::endl;
+
         #ifdef DEBUG_MESSAGE
         {
           debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
