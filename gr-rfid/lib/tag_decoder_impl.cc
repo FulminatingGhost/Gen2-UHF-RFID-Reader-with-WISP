@@ -269,7 +269,7 @@ namespace gr
     }
 
     // clustering algotirhm
-    float tag_decoder_impl::IQ_distance(const gr_complex p1, const gr_complex p2)
+    double tag_decoder_impl::IQ_distance(const gr_complex p1, const gr_complex p2)
     {
       return std::sqrt(std::pow((p1.real() - p2.real()), 2) + std::pow((p1.imag() - p2.imag()), 2));
     }
@@ -278,9 +278,10 @@ namespace gr
     {
       std::vector<int> center_idx;
       std::vector<int> local_density;
-      std::vector<float> local_distance;
+      std::vector<double> local_distance;
+      std::vector<double> normalized_local_distance;
 
-      const float threshold = 0.005;
+      const double cutoff_distance = 0.005;
 
       std::ofstream parallel("parallel", std::ios::app);
 
@@ -291,13 +292,51 @@ namespace gr
 
         for(int j=0 ; j<size ; j++)
         {
-          if(IQ_distance(in[i], in[j]) < threshold) current_local_density++;
+          if(IQ_distance(in[i], in[j]) < cutoff_distance) current_local_density++;
         }
 
         parallel << current_local_density << " ";
         local_density.push_back(current_local_density);
       }
       parallel << std::endl << std::endl;
+
+      parallel << "\t\t\t\t\t** local distance **" << std::endl;
+      for(int i=0 ; i<size ; i++)
+      {
+        double min_distance = 1.7e308;
+
+        for(int j=0 ; j<size ; j++)
+        {
+          if(local_density[j] <= local_density[i]) continue;
+
+          double distance = IQ_distance(in[i], in[j]);
+          if(distance < min_distance) min_distance = distance;
+        }
+
+        parallel << min_distance << " ";
+        local_distance.push_back(min_distance);
+      }
+      parallel << std::endl << std::endl;
+
+      // normalize the local distance
+      double average = 0.0f;
+      for(int i=0 ; i<size ; i++)
+        average += local_distance[i];
+      average /= size;
+      std::cout << average << std::endl;
+
+      double standard_deviation = 0.0f;
+      for(int i=0 ; i<size ; i++)
+        standard_deviation += std::pow(local_distance[i] - average, 2);
+      standard_deviation /= size;
+      standard_deviation = std::sqrt(standard_deviation);
+      std::cout << standard_deviation << std::endl;
+
+      for(int i=0 ; i<size ; i++)
+      {
+        normalized_local_distance.push_back((local_distance[i] - average) / standard_deviation);
+        parallel << normalized_local_distance.back() << " ";
+      }
 
       parallel.close();
 

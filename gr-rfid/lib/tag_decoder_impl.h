@@ -48,7 +48,7 @@ namespace gr {
         int decode_single_bit(float* in, int index, int mask_level, float* ret_corr);
         std::vector<float> tag_detection(float* in, int index, int n_expected_bit);
 
-        float IQ_distance(const gr_complex p1, const gr_complex p2);
+        double IQ_distance(const gr_complex p1, const gr_complex p2);
         std::vector<int> clustering_algorithm(const gr_complex* in, const int size);
 
         int check_crc(char * bits, int num_bits);
