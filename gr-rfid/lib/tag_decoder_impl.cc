@@ -319,13 +319,13 @@ namespace gr
       parallel << std::endl << std::endl;
 
       // normalize the local distance
-      double average = 0.0f;
+      double average = 0;
       for(int i=0 ; i<size ; i++)
         average += local_distance[i];
       average /= size;
       std::cout << average << std::endl;
 
-      double standard_deviation = 0.0f;
+      double standard_deviation = 0;
       for(int i=0 ; i<size ; i++)
         standard_deviation += std::pow(local_distance[i] - average, 2);
       standard_deviation /= size;
