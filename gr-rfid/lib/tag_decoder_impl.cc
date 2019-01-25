@@ -304,16 +304,26 @@ namespace gr
       for(int i=0 ; i<size ; i++)
       {
         double min_distance = 1.7e308;
+        int count = 0;
 
         for(int j=0 ; j<size ; j++)
         {
-          if(local_density[j] <= local_density[i]) continue;
+          if(local_density[i] >= local_density[j]) continue;
 
           double distance = IQ_distance(in[i], in[j]);
           if(distance < min_distance) min_distance = distance;
+
+          if(i==736)
+          {
+            std::cout<< j << " " << distance << " " << min_distance << std::endl;
+          }
+
+          count++;
         }
 
+        if(count == 0) min_distance = 0;
         parallel << min_distance << " ";
+        if(i==736) std::cout << "result=" << min_distance <<std::endl;
         local_distance.push_back(min_distance);
       }
       parallel << std::endl << std::endl;
@@ -323,14 +333,12 @@ namespace gr
       for(int i=0 ; i<size ; i++)
         average += local_distance[i];
       average /= size;
-      std::cout << average << std::endl;
 
       double standard_deviation = 0;
       for(int i=0 ; i<size ; i++)
         standard_deviation += std::pow(local_distance[i] - average, 2);
       standard_deviation /= size;
       standard_deviation = std::sqrt(standard_deviation);
-      std::cout << standard_deviation << std::endl;
 
       for(int i=0 ; i<size ; i++)
       {
