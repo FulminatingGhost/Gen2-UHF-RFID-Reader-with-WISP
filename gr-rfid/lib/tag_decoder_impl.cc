@@ -281,7 +281,10 @@ namespace gr
       std::vector<double> local_distance;
       std::vector<double> normalized_local_distance;
 
-      const double cutoff_distance = 0.005;
+      const double cutoff_distance = 0.0001;
+
+      double max_local_density = 0;
+      double max_local_distance = 0;
 
       std::ofstream parallel("parallel", std::ios::app);
 
@@ -296,6 +299,7 @@ namespace gr
         }
 
         parallel << current_local_density << " ";
+        if(current_local_density > max_local_density) max_local_density = current_local_density;
         local_density.push_back(current_local_density);
       }
       parallel << std::endl << std::endl;
@@ -312,44 +316,52 @@ namespace gr
 
           double distance = IQ_distance(in[i], in[j]);
           if(distance < min_distance) min_distance = distance;
-
-          if(i==736)
-          {
-            std::cout<< j << " " << distance << " " << min_distance << std::endl;
-          }
-
           count++;
         }
 
         if(count == 0) min_distance = 0;
         parallel << min_distance << " ";
-        if(i==736) std::cout << "result=" << min_distance <<std::endl;
+        if(min_distance > max_local_distance) max_local_distance = min_distance;
         local_distance.push_back(min_distance);
       }
       parallel << std::endl << std::endl;
 
-      // normalize the local distance
-      double average = 0;
-      for(int i=0 ; i<size ; i++)
-        average += local_distance[i];
-      average /= size;
+      max_local_density /= 5;
+      max_local_distance /= 5;
 
-      double standard_deviation = 0;
-      for(int i=0 ; i<size ; i++)
-        standard_deviation += std::pow(local_distance[i] - average, 2);
-      standard_deviation /= size;
-      standard_deviation = std::sqrt(standard_deviation);
+      int count = 0;
 
+      parallel << "\t\t\t\t\t** center idx **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
-        normalized_local_distance.push_back((local_distance[i] - average) / standard_deviation);
-        parallel << normalized_local_distance.back() << " ";
+        if(local_density[i] > max_local_density && local_distance[i] > max_local_distance)
+        {
+          center_idx.push_back(i);
+          parallel << i << " ";
+          count++;
+        }
       }
+      parallel << std::endl << std::endl;
 
+      if(count == 0) center_idx.push_back(-1);
+      else
+      {
+        parallel << "\t\t\t\t\t** center idx (I) **" << std::endl;
+        for(int i=0 ; i<center_idx.size() ; i++)
+        {
+          parallel << in[i].real() << " ";
+        }
+        parallel << std::endl << std::endl;
+
+        parallel << "\t\t\t\t\t** center idx (Q) **" << std::endl;
+        for(int i=0 ; i<center_idx.size() ; i++)
+        {
+          parallel << in[i].imag() << " ";
+        }
+        parallel << std::endl << std::endl;
+      }
+      
       parallel.close();
-
-      center_idx.push_back(1);
-      center_idx.push_back(2);
       return center_idx;
     }
 
@@ -473,9 +485,13 @@ namespace gr
 
             log << "└──────────────────────────────────────────────────" << std::endl;
             if(reader_state->reader_stats.cur_inventory_round > MAX_NUM_QUERIES)
+            {
+              reader_state->reader_stats.cur_inventory_round--;
               reader_state-> status = TERMINATED;
-
-            reader_state->gen2_logic_status = SEND_QUERY;
+              reader_state->decoder_status = DECODER_TERMINATED;
+            }
+            else
+              reader_state->gen2_logic_status = SEND_QUERY;
           }
           else
           {
@@ -614,9 +630,13 @@ namespace gr
 
           log << "└──────────────────────────────────────────────────" << std::endl;
           if(reader_state->reader_stats.cur_inventory_round > MAX_NUM_QUERIES)
+          {
+            reader_state->reader_stats.cur_inventory_round--;
             reader_state-> status = TERMINATED;
-
-          reader_state->gen2_logic_status = SEND_QUERY;
+            reader_state->decoder_status = DECODER_TERMINATED;
+          }
+          else
+            reader_state->gen2_logic_status = SEND_QUERY;
         }
         else
         {
