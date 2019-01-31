@@ -276,12 +276,14 @@ namespace gr
 
     std::vector<int> tag_decoder_impl::clustering_algorithm(const gr_complex* in, const int size)
     {
+      std::vector<int> center_candidate_idx;
       std::vector<int> center_idx;
+
       std::vector<int> local_density;
       std::vector<double> local_distance;
       std::vector<double> normalized_local_distance;
 
-      const double cutoff_distance = 0.0001;
+      const double cutoff_distance = 0.00025;
 
       double max_local_density = 0;
       double max_local_distance = 0;
@@ -321,23 +323,35 @@ namespace gr
 
         if(count == 0) min_distance = 0;
         parallel << min_distance << " ";
-        if(min_distance > max_local_distance) max_local_distance = min_distance;
         local_distance.push_back(min_distance);
       }
       parallel << std::endl << std::endl;
 
-      max_local_density /= 5;
-      max_local_distance /= 5;
+      max_local_density /= 10;
 
+      parallel << "\t\t\t\t\t** center candidate idx **" << std::endl;
+      for(int i=0 ; i<size ; i++)
+      {
+        if(local_density[i] > max_local_density)
+        {
+          center_candidate_idx.push_back(i);
+          if(local_distance[i] > max_local_distance) max_local_distance = local_distance[i];
+          parallel << i << " ";
+        }
+      }
+      parallel << std::endl << std::endl;
+
+      max_local_distance /= 10;
       int count = 0;
 
       parallel << "\t\t\t\t\t** center idx **" << std::endl;
-      for(int i=0 ; i<size ; i++)
+      for(int i=0 ; i<center_candidate_idx.size() ; i++)
       {
-        if(local_density[i] > max_local_density && local_distance[i] > max_local_distance)
+        //std::cout << i << " " << local_distance[i] << " " << max_local_distance << std::endl;
+        if(local_distance[center_candidate_idx[i]] > max_local_distance)
         {
-          center_idx.push_back(i);
-          parallel << i << " ";
+          center_idx.push_back(center_candidate_idx[i]);
+          parallel << center_candidate_idx[i] << " ";
           count++;
         }
       }
@@ -346,21 +360,21 @@ namespace gr
       if(count == 0) center_idx.push_back(-1);
       else
       {
-        parallel << "\t\t\t\t\t** center idx (I) **" << std::endl;
+        parallel << "\t\t\t\t\t** center (I) **" << std::endl;
         for(int i=0 ; i<center_idx.size() ; i++)
         {
-          parallel << in[i].real() << " ";
+          parallel << in[center_idx[i]].real() << " ";
         }
         parallel << std::endl << std::endl;
 
-        parallel << "\t\t\t\t\t** center idx (Q) **" << std::endl;
+        parallel << "\t\t\t\t\t** center (Q) **" << std::endl;
         for(int i=0 ; i<center_idx.size() ; i++)
         {
-          parallel << in[i].imag() << " ";
+          parallel << in[center_idx[i]].imag() << " ";
         }
         parallel << std::endl << std::endl;
       }
-      
+
       parallel.close();
       return center_idx;
     }
