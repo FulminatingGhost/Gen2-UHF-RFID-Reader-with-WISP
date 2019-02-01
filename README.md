@@ -15,36 +15,35 @@ Get more information at below WISP wiki website.
 
 ## Installation
 1. Install the UHD driver and GNU Radio program. Use below instruction to check the success of the hardware installation.
- * uhd_find_devices
+<pre><code>$ uhd_find_devices`</code></pre>
 
 2. Visit below and check the latest release of this program. Copy the link of the source code.
  * https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/releases
 
 3. Download the source code.
- * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).zip
- * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).tar.gz
+<pre><code>$ wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).zip
+$ wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).tar.gz</code></pre>
 
 4. Unzip the ".zip" or ".tar.gz" file.
- * unzip *
- * tar -xvzf *
+<pre><code>$ unzip *
+$ tar -xvzf *</code></pre>
  
 5. Execute the script file "init.sh" for initial build.
- * ./init.sh
- 
-or type the below instructions manually.
- * cd gr-rfid
- * mkdir build
- * cd build
- * cmake ../
- * make
- * make test
- * sudo make install
- * sudo ldconfig
- * cd ../misc
- * mkdir data
- * cd data
- * touch source matched_filter gate decoder
- * cd ../../apps
+<pre><code>$ ./init.sh</code></pre>  
+or type the below instructions manually.  
+<pre><code>$ cd gr-rfid
+$ mkdir build
+$ cd build
+$ cmake ../
+$ make
+$ make test
+$ sudo make install
+$ sudo ldconfig
+$ cd ../misc
+$ mkdir data
+$ cd data
+$ touch source matched_filter gate decoder
+$ cd ../../apps</code></pre>
 
 ## Configuration
 There are several variables you can modify in order to fit your experimental environment.
@@ -84,16 +83,16 @@ Set the name of the folder which saves the debug files. You have to change reade
 
 ## Execution
 Execute the "gr-rfid/apps/reader.py" python file. You must delete the "debug_data" folder before the every execution, because the program does not automatically remove the debug files from the previous execution. For convenience, there is a script file which automatically delete the unnecessary files. Use "reader.sh" rather than directly executing "reader.py".
- * ./reader.sh
+<pre><code>$ ./reader.sh</code></pre>
 
 If you made any change in ".cc" or ".h" file, you must rebuild the program. Execute the script file "build.sh". You don't need to rebuild the program when you only modify the "reader.py" file.
- * ./build.sh
+<pre><code>$ ./build.sh</code></pre>
  
 or type the below instructions manually.
- * cd ../build && make && make test && sudo make install && sudo ldconfig && cd ../apps
+<pre><code>$ cd ../build && make && make test && sudo make install && sudo ldconfig && cd ../apps</code></pre>
 
 When debugging mode, rename the "gr-rfid/misc/data/source" file to "file_source". Don't forget to make new "source" file after renaming.
- * touch source
+<pre><code>$ touch source</code></pre>
 
 If you want to reenact the execution, backup the "source" file in somewhere. You can easily reenact the execution by renaming file name to "file_source".
 
@@ -121,8 +120,9 @@ Logs the output of the gate block. These samples are the input of the tag_decode
 Logs the transmitted samples.
 
 These files can be plotted by graphic interface. Use below instruction. The blue line figures the real value, and the red line figures the imaginary value.
- * gr_plot_iq -B (sample_window) (file_name)
- * (ex) gr_plot_iq -B 100000 matched_filter
+<pre><code>$ gr_plot_iq -B (sample_window) (file_name)</code></pre>
+For example, below instruction opens the matched_filter file with sample window 100000.
+<pre><code>$ gr_plot_iq -B 100000 matched_filter</code></pre>
 
 ## Tested on:
 Ubuntu 16.04 64-bit  
