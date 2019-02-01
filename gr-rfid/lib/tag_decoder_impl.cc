@@ -284,7 +284,6 @@ namespace gr
       }
 
       output.push_back(idx);  // start idx of the data sample
-      std::cout<<idx<<std::endl;
 
       idx += data_len*n_samples_TAG_BIT;
       average = in[idx];
@@ -295,7 +294,6 @@ namespace gr
         average += in[idx+i];
         average /= 2;
 
-        //std::cout << "idx= " << idx << " idx+i= " << idx+i << " " << in[idx] << " " << average << " " << in[idx] - average << std::endl;
         if(std::abs(in[idx+i] - average) > threshold)
         {
           count = 0;
@@ -308,7 +306,6 @@ namespace gr
       }
 
       output.push_back(idx-output[0]+1);  // size of the data sample
-      std::cout<<idx<<" "<<output[0]<<" "<<idx-output[0]+1<<std::endl;
       return output;
     }
 
@@ -446,11 +443,11 @@ namespace gr
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
-        std::vector<int> data_idx = cut_noise_sample(norm_in, ninput_items[0], TAG_PREAMBLE_BITS+RN16_BITS);
+        std::vector<int> data_idx = cut_noise_sample(norm_in, ninput_items[0], TAG_PREAMBLE_BITS+RN16_BITS-1);
 
         std::vector<gr_complex> cut_in;
         std::vector<float> cut_norm_in;
-        for(int i=data_idx[0] ; i<data_idx[1] ; i++)
+        for(int i=data_idx[0] ; i<data_idx[0]+data_idx[1] ; i++)
         {
           cut_in.push_back(in[i]);
           cut_norm_in.push_back(norm_in[i]);
@@ -495,8 +492,6 @@ namespace gr
           debug.close();
         }
         #endif
-
-        std::cout << "FINISH" <<std::endl;
 
         // detect preamble
         int RN16_index = tag_sync(norm_in, ninput_items[0]);  //find where the tag data bits start
