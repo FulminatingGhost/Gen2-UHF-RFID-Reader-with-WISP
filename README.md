@@ -14,37 +14,37 @@ Get more information at below WISP wiki website.
  * http://wisp5.wispsensor.net
 
 ## Installation
-1. Install the UHD driver and GNU Radio program. Use below instruction to check the success of the hardware installation.
- * uhd_find_devices
+1. Install the UHD driver and GNU Radio program. Use below instruction to check the success of the hardware installation.  
+`$ uhd_find_devices`
 
 2. Visit below and check the latest release of this program. Copy the link of the source code.
  * https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/releases
 
-3. Download the source code.
- * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).zip
- * wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).tar.gz
+3. Download the source code.  
+`$  wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).zip`  
+`$ wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(version).tar.gz`
 
-4. Unzip the ".zip" or ".tar.gz" file.
- * unzip *
- * tar -xvzf *
+4. Unzip the ".zip" or ".tar.gz" file.  
+`$ unzip *`  
+`$ tar -xvzf *`
  
-5. Execute the script file "init.sh" for initial build.
- * ./init.sh
+5. Execute the script file "init.sh" for initial build.  
+`$ ./init.sh`
  
-or type the below instructions manually.
- * cd gr-rfid
- * mkdir build
- * cd build
- * cmake ../
- * make
- * make test
- * sudo make install
- * sudo ldconfig
- * cd ../misc
- * mkdir data
- * cd data
- * touch source matched_filter gate decoder
- * cd ../../apps
+or type the below instructions manually.  
+`$ cd gr-rfid`  
+`$ mkdir build`  
+`$ cd build`  
+`$ cmake ../`  
+`$ make`  
+`$ make test`  
+`$ sudo make install`  
+`$ sudo ldconfig`  
+`$ cd ../misc`  
+`$ mkdir data`  
+`$ cd data`  
+`$ touch source matched_filter gate decoder`  
+`$ cd ../../apps`
 
 ## Configuration
 There are several variables you can modify in order to fit your experimental environment.
