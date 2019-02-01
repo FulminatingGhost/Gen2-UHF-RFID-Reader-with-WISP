@@ -75,7 +75,7 @@ namespace gr
       ninput_items_required[0] = noutput_items;
     }
 
-    int tag_decoder_impl::tag_sync(float* norm_in, int size)
+    int tag_decoder_impl::tag_sync(std::vector<float> norm_in, int size)
     // This method searches the preamble and returns the start index of the tag data.
     // If the correlation value exceeds the threshold, it returns the start index of the tag data.
     // Else, it returns -1.
@@ -144,7 +144,7 @@ namespace gr
       else return -1;
     }
 
-    int tag_decoder_impl::determine_first_mask_level(float* norm_in, int index)
+    int tag_decoder_impl::determine_first_mask_level(std::vector<float> norm_in, int index)
     // This method searches whether the first bit starts with low level or high level.
     // If the first bit starts with low level, it returns -1.
     // If the first bit starts with high level, it returns 0.
@@ -169,7 +169,7 @@ namespace gr
       return max_max_index;
     }
 
-    int tag_decoder_impl::decode_single_bit(float* norm_in, int index, int mask_level, float* ret_corr)
+    int tag_decoder_impl::decode_single_bit(std::vector<float> norm_in, int index, int mask_level, float* ret_corr)
     // This method decodes single bit and returns the decoded value and the correlation score.
     // index: start point of "data bit", do not decrease half bit!
     // mask_level: start level of "decoding bit". (-1)low level start, (1)high level start.
@@ -215,7 +215,7 @@ namespace gr
       return max_index;
     }
 
-    std::vector<float> tag_decoder_impl::tag_detection(float* norm_in, int index, int n_expected_bit)
+    std::vector<float> tag_decoder_impl::tag_detection(std::vector<float> norm_in, int index, int n_expected_bit)
     // This method decodes n_expected_bit of data by using previous methods, and returns the vector of the decoded data.
     // index: start point of "data bit", do not decrease half bit!
     {
@@ -268,13 +268,57 @@ namespace gr
       return decoded_bits;
     }
 
+    std::vector<int> tag_decoder_impl::cut_noise_sample(std::vector<float> in, const int size, const int data_len)
+    {
+      std::vector<int> output;
+
+      int idx = 1;
+      const float threshold = 0.002;
+      float average = in[0];
+
+      for(; idx<size ; idx++)
+      {
+        average += in[idx];
+        average /= 2;
+        if(std::abs(in[idx] - average) > threshold) break;
+      }
+
+      output.push_back(idx);  // start idx of the data sample
+      std::cout<<idx<<std::endl;
+
+      idx += data_len*n_samples_TAG_BIT;
+      average = in[idx];
+      int count = 0;
+
+      for(int i=1 ; idx+i<size ; i++)
+      {
+        average += in[idx+i];
+        average /= 2;
+
+        //std::cout << "idx= " << idx << " idx+i= " << idx+i << " " << in[idx] << " " << average << " " << in[idx] - average << std::endl;
+        if(std::abs(in[idx+i] - average) > threshold)
+        {
+          count = 0;
+          idx += i;
+          i = 0;
+          average = in[idx];
+        }
+        else count++;
+        if(count >= 1.5 * n_samples_TAG_BIT) break;
+      }
+
+      output.push_back(idx-output[0]+1);  // size of the data sample
+      std::cout<<idx<<" "<<output[0]<<" "<<idx-output[0]+1<<std::endl;
+      return output;
+    }
+
     // clustering algotirhm
     double tag_decoder_impl::IQ_distance(const gr_complex p1, const gr_complex p2)
     {
       return std::sqrt(std::pow((p1.real() - p2.real()), 2) + std::pow((p1.imag() - p2.imag()), 2));
     }
 
-    std::vector<int> tag_decoder_impl::clustering_algorithm(const gr_complex* in, const int size)
+    std::vector<int> tag_decoder_impl::clustering_algorithm(std::vector<gr_complex> in, const int size)
     {
       std::vector<int> center_candidate_idx;
       std::vector<int> center_idx;
@@ -283,7 +327,7 @@ namespace gr
       std::vector<double> local_distance;
       std::vector<double> normalized_local_distance;
 
-      const double cutoff_distance = 0.00025;
+      const double cutoff_distance = 0.0005;
 
       double max_local_density = 0;
       double max_local_distance = 0;
@@ -386,7 +430,7 @@ namespace gr
       gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const  gr_complex *) input_items[0];
-      float *norm_in = new float[ninput_items[0]];
+      std::vector<float> norm_in;
       float *out = (float *) output_items[0];
       int consumed = 0;
 
@@ -397,22 +441,36 @@ namespace gr
 
       // convert from complex value to float value
       for(int i=0 ; i<ninput_items[0] ; i++)
-        norm_in[i] = std::sqrt(std::norm(in[i]));
+        norm_in.push_back(std::sqrt(std::norm(in[i])));
 
       // Processing only after n_samples_to_ungate are available and we need to decode an RN16
       if(reader_state->decoder_status == DECODER_DECODE_RN16 && ninput_items[0] >= reader_state->n_samples_to_ungate)
       {
-        std::vector<int> center = clustering_algorithm(in, ninput_items[0]);
-        std::cout << "finish correctly" << std::endl;
+        std::vector<int> data_idx = cut_noise_sample(norm_in, ninput_items[0], TAG_PREAMBLE_BITS+RN16_BITS);
+
+        std::vector<gr_complex> cut_in;
+        std::vector<float> cut_norm_in;
+        for(int i=data_idx[0] ; i<data_idx[1] ; i++)
+        {
+          cut_in.push_back(in[i]);
+          cut_norm_in.push_back(norm_in[i]);
+        }
+
+        std::vector<int> center = clustering_algorithm(cut_in, data_idx[1]);
 
         #ifdef DEBUG_MESSAGE
         {
           debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)).c_str(), std::ios::app);
           debug << "n_samples_to_ungate= " << reader_state->n_samples_to_ungate << ", ninput_items[0]= " << ninput_items[0] << std::endl;
           debug << "\t\t\t\t\t** samples from gate **" << std::endl;
-          for(int i=0 ; i<ninput_items[0] ; i++)
+          for(int i=0 ; i<norm_in.size() ; i++)
             debug << norm_in[i] << " ";
           debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+
+          debug << "\t\t\t\t\t** (cut) samples from gate **" << std::endl;
+          for(int i=0 ; i<cut_norm_in.size() ; i++)
+            debug << cut_norm_in[i] << " ";
+          debug << std::endl << "\t\t\t\t\t** (cut) samples from gate **" << std::endl << std::endl << std::endl << std::endl;
           debug.close();
 
           debug.open((debug_message+std::to_string(reader_state->reader_stats.cur_inventory_round)+"_"+std::to_string(reader_state->reader_stats.cur_slot_number)+"_iq").c_str(), std::ios::app);
@@ -425,9 +483,20 @@ namespace gr
           for(int i=0 ; i<ninput_items[0] ; i++)
             debug << in[i].imag() << " ";
           debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+
+          debug << "\t\t\t\t\t** (cut) samples from gate (I) **" << std::endl;
+          for(int i=0 ; i<cut_in.size() ; i++)
+            debug << cut_in[i].real() << " ";
+          debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
+          debug << "\t\t\t\t\t** samples from gate (Q) **" << std::endl;
+          for(int i=0 ; i<cut_in.size() ; i++)
+            debug << cut_in[i].imag() << " ";
+          debug << std::endl << "\t\t\t\t\t** samples from gate **" << std::endl << std::endl << std::endl << std::endl;
           debug.close();
         }
         #endif
+
+        std::cout << "FINISH" <<std::endl;
 
         // detect preamble
         int RN16_index = tag_sync(norm_in, ninput_items[0]);  //find where the tag data bits start
@@ -662,7 +731,7 @@ namespace gr
         // process for GNU RADIO
         consumed = reader_state->n_samples_to_ungate;
       }
-      delete[] norm_in;
+
       consume_each(consumed);
       return WORK_CALLED_PRODUCE;
     }

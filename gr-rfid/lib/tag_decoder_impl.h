@@ -43,13 +43,14 @@ namespace gr {
         FILE *preamble_fp;
         int success_count;
 
-        int tag_sync(float* in, int size);
-        int determine_first_mask_level(float* in, int index);
-        int decode_single_bit(float* in, int index, int mask_level, float* ret_corr);
-        std::vector<float> tag_detection(float* in, int index, int n_expected_bit);
+        int tag_sync(std::vector<float> in, int size);
+        int determine_first_mask_level(std::vector<float> in, int index);
+        int decode_single_bit(std::vector<float> in, int index, int mask_level, float* ret_corr);
+        std::vector<float> tag_detection(std::vector<float> in, int index, int n_expected_bit);
 
+        std::vector<int> cut_noise_sample(std::vector<float> in, const int size, const int data_len);
         double IQ_distance(const gr_complex p1, const gr_complex p2);
-        std::vector<int> clustering_algorithm(const gr_complex* in, const int size);
+        std::vector<int> clustering_algorithm(std::vector<gr_complex> in, const int size);
 
         int check_crc(char * bits, int num_bits);
 
