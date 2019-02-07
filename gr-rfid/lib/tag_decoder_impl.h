@@ -50,7 +50,8 @@ namespace gr {
 
         std::vector<int> cut_noise_sample(std::vector<float> in, const int size, const int data_len);
         double IQ_distance(const gr_complex p1, const gr_complex p2);
-        std::vector<int> clustering_algorithm(std::vector<gr_complex> in, const int size);
+        std::vector<int> clustering_algorithm(const std::vector<gr_complex> in, const int size);
+        std::vector<int> assign_sample_to_cluster(const std::vector<gr_complex> in, const int size, const std::vector<int> center);
 
         int check_crc(char * bits, int num_bits);
 

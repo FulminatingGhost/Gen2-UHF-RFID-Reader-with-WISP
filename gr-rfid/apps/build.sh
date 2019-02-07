@@ -1,4 +1,4 @@
-git pull origin parallel_cutoff
+git pull origin parallel_cdf
 cd ../build
 make
 make test
