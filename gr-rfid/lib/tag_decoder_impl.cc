@@ -323,10 +323,9 @@ namespace gr
       std::vector<double> local_distance;
       std::vector<int> min_distance_id;
 
-      const double cutoff_distance = 0.0005;
+      const double cutoff_distance = 0.001;
 
       double max_local_density = 0;
-      double max_local_distance = 0;
 
       std::ofstream parallel("parallel", std::ios::app);
 
@@ -349,28 +348,22 @@ namespace gr
       parallel << "\t\t\t\t\t** local distance **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
-        double min_distance = 1.7e308;
-        int count = 0;int id;
+        double min_distance = 1;
 
         for(int j=0 ; j<size ; j++)
         {
-          //if(i==j) continue;
           if(local_density[i] >= local_density[j]) continue;
 
           double distance = IQ_distance(in[i], in[j]);
-          if(distance < min_distance) {min_distance = distance;id=j;}
-          count++;
+          if(distance < min_distance) min_distance = distance;
         }
 
-        if(count == 0) min_distance = 0;
         parallel << min_distance << " ";
-        if(min_distance > max_local_distance) max_local_distance = min_distance;
-        local_distance.push_back(min_distance);min_distance_id.push_back(id);
+        local_distance.push_back(min_distance);
       }
       parallel << std::endl << std::endl;
 
       max_local_density /= 10;
-      max_local_distance /= 10;
       int count = 0;
 
       parallel << "\t\t\t\t\t** center idx **" << std::endl;
@@ -402,20 +395,6 @@ namespace gr
         }
         parallel << std::endl << std::endl;
       }
-//std::cout << in[402].real() << " " << in[402].imag() << " " << in[1131].real() << " " << in[1131].imag() << " " << size << " ";
-//std::cout <<"dis= " << IQ_distance(in[402], in[1131]) << " ";
-std::cout<<std::endl;
-    for(int i=0 ; i<center_idx.size() ; i++)
-    {
-      std::cout<<"i= " << center_idx[i] << " den= " << local_density[center_idx[i]] << " dis= " << local_distance[center_idx[i]] << " compare= " << min_distance_id[center_idx[i]] << " den= " << local_density[min_distance_id[center_idx[i]]] << std::endl;
-
-      for(int j=0 ; j<center_idx.size() ; j++)
-      {
-        if(i==j) continue;
-
-
-      }
-    }
 
       parallel.close();
       return center_idx;
