@@ -323,7 +323,7 @@ namespace gr
       std::vector<double> local_distance;
       std::vector<int> min_distance_id;
 
-      const double cutoff_distance = 0.0001;
+      const double cutoff_distance = 0.0005;
 
       double max_local_density = 0;
       double max_local_distance = 0;
@@ -376,7 +376,7 @@ namespace gr
       parallel << "\t\t\t\t\t** center idx **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
-        if(local_density[i] > max_local_density && local_distance[i] > max_local_distance)
+        if(local_density[i] > max_local_density && local_distance[i] > cutoff_distance)
         {
           center_idx.push_back(i);
           parallel << i << " ";
