@@ -321,11 +321,11 @@ namespace gr
 
       std::vector<int> local_density;
       std::vector<double> local_distance;
+      std::vector<int> min_distance_id;
 
-      const double cutoff_distance = 0.0005;
+      const double cutoff_distance = 0.001;
 
       double max_local_density = 0;
-      double max_local_distance = 0;
 
       std::ofstream parallel("parallel", std::ios::app);
 
@@ -348,8 +348,7 @@ namespace gr
       parallel << "\t\t\t\t\t** local distance **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
-        double min_distance = 1.7e308;
-        int count = 0;
+        double min_distance = 1;
 
         for(int j=0 ; j<size ; j++)
         {
@@ -357,24 +356,20 @@ namespace gr
 
           double distance = IQ_distance(in[i], in[j]);
           if(distance < min_distance) min_distance = distance;
-          count++;
         }
 
-        if(count == 0) min_distance = 0;
         parallel << min_distance << " ";
-        if(min_distance > max_local_distance) max_local_distance = min_distance;
         local_distance.push_back(min_distance);
       }
       parallel << std::endl << std::endl;
 
       max_local_density /= 10;
-      max_local_distance /= 10;
       int count = 0;
 
       parallel << "\t\t\t\t\t** center idx **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
-        if(local_density[i] > max_local_density && local_distance[i] > max_local_distance)
+        if(local_density[i] > max_local_density && local_distance[i] > cutoff_distance)
         {
           center_idx.push_back(i);
           parallel << i << " ";
