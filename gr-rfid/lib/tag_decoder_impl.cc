@@ -436,6 +436,33 @@ namespace gr
       flip.close();
     }
 
+    void tag_decoder_impl::count_flip(int** flip_info, const std::vector<int> clustered_idx, int size)
+    {
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flip_info[i][j] = 0;
+      }
+
+      for(int i=0 ; i<clustered_idx.size()-1 ; i++)
+      {
+        if(clustered_idx[i] == clustered_idx[i+1]) continue;
+        flip_info[clustered_idx[i]][clustered_idx[i+1]]++;
+      }
+
+      std::ofstream flip("flip", std::ios::app);
+
+      flip<<std::endl<<std::endl;
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flip << flip_info[i][j] << " ";
+        flip << std::endl;
+      }
+
+      flip.close();
+    }
+
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
@@ -472,6 +499,11 @@ namespace gr
         std::vector<int> center = clustering_algorithm(cut_in, data_idx[1]);
         std::vector<int> clustered_idx = assign_sample_to_cluster(cut_in, data_idx[1], center);
         int filter_idx = filter_aligned_flip(clustered_idx);
+
+        int** flip_info = new int*[center.size()];
+        for(int i=0 ; i<center.size() ; i++)
+          flip_info[i] = new int[center.size()];
+        count_flip(flip_info, clustered_idx, center.size());
 
         #ifdef DEBUG_MESSAGE
         {
