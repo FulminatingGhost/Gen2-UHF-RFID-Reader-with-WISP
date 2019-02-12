@@ -53,6 +53,8 @@ namespace gr {
         std::vector<int> clustering_algorithm(const std::vector<gr_complex> in, const int size);
         std::vector<int> assign_sample_to_cluster(const std::vector<gr_complex> in, const int size, const std::vector<int> center);
 
+        int filter_aligned_flip(const std::vector<int> clustered_idx);
+
         int check_crc(char * bits, int num_bits);
 
       public:

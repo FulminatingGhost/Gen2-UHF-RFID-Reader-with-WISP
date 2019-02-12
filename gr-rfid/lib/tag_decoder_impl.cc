@@ -410,6 +410,32 @@ namespace gr
       return clustered_idx;
     }
 
+    int tag_decoder_impl::filter_aligned_flip(const std::vector<int> clustered_idx)
+    {
+      const int window_size = 100;
+      int count = 0;
+
+      std::ofstream flip("flip", std::ios::app);
+
+      for(int i=1 ; i<window_size ; i++)
+      {
+        if(clustered_idx[i] != clustered_idx[i-1])
+          count++;
+      }
+
+      for(int i=window_size+1 ; i<clustered_idx.size() ; i++)
+      {
+        if(clustered_idx[i] != clustered_idx[i-1])
+          count++;
+        if(clustered_idx[i-window_size] != clustered_idx[i-window_size-1])
+          count--;
+
+        flip << count << " ";
+      }
+
+      flip.close();
+    }
+
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
@@ -445,6 +471,7 @@ namespace gr
 
         std::vector<int> center = clustering_algorithm(cut_in, data_idx[1]);
         std::vector<int> clustered_idx = assign_sample_to_cluster(cut_in, data_idx[1], center);
+        int filter_idx = filter_aligned_flip(clustered_idx);
 
         #ifdef DEBUG_MESSAGE
         {
