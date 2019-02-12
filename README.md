@@ -67,7 +67,7 @@ Change addr value with the address of your USRP reader. (default: 192.168.1.2)
 
 ### gr-rfid/include/global_vars.h
  * line 29: DEBUG_MESSAGE  
-Annotate this line, if you don't want to make the debug files. (dafault: exist)
+Annotate this line, if you don't want to make the debug files. (dafault: annotated)
 
  * line 75: FIXED_Q  
 The number of slot is fixed by 2^(FIXED_Q). (default FIXED_Q: 0 / default slot number: 1)
