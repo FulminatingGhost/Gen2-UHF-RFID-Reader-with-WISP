@@ -410,49 +410,280 @@ namespace gr
       return clustered_idx;
     }
 
-    std::vector<int> tag_decoder_impl::assign_sample_to_cluster(const std::vector<gr_complex> in, const int size, const std::vector<int> center)
+    int tag_decoder_impl::filter_aligned_flip(const std::vector<int> clustered_idx)
     {
-      std::vector<int> clustered_idx;
+      const int window_size = 100;
+      int count = 0;
+
+      std::ofstream flip("flip", std::ios::app);
+
+      for(int i=1 ; i<window_size ; i++)
+      {
+        if(clustered_idx[i] != clustered_idx[i-1])
+          count++;
+      }
+
+      for(int i=window_size+1 ; i<clustered_idx.size() ; i++)
+      {
+        if(clustered_idx[i] != clustered_idx[i-1])
+          count++;
+        if(clustered_idx[i-window_size] != clustered_idx[i-window_size-1])
+          count--;
+
+        flip << count << " ";
+      }
+
+      flip.close();
+    }
+
+    void tag_decoder_impl::count_flip(int** flip_info, const std::vector<int> clustered_idx, int size)
+    {
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flip_info[i][j] = 0;
+      }
+
+      for(int i=0 ; i<clustered_idx.size()-1 ; i++)
+      {
+        if(clustered_idx[i] == clustered_idx[i+1]) continue;
+        flip_info[clustered_idx[i]][clustered_idx[i+1]]++;
+      }
+
+      std::ofstream flip("flip", std::ios::app);
+
+      flip<<std::endl<<std::endl;
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flip << flip_info[i][j] << " ";
+        flip << std::endl;
+      }
+      flip << std::endl;
+
+      flip.close();
+    }
+
+    int tag_decoder_impl::check_odd_cycle_OFG(OFG_node* OFG, int start, int compare, int check, std::vector<int> stack)
+    {
+      if(start == compare)
+      {
+        if(check == 1) return 1;
+        else return -1;
+      }
+
+      for(int i=0 ; i<stack.size() ; i++)
+      {
+        if(stack[i] == compare) return 0;
+      }
+
+      check *= -1;
+      stack.push_back(compare);
+
+      for(int i=0 ; i<OFG[compare].link.size() ; i++)
+      {
+        if(check_odd_cycle_OFG(OFG, start, OFG[compare].link[i], check, stack) == -1) return -1;
+      }
+
+      return 0;
+    }
+
+    void tag_decoder_impl::construct_OFG(OFG_node* OFG, int** flip_info, int size, int n_tag)
+    {
+      std::ofstream flipf("flip", std::ios::app);
+
+      int** flip = new int*[size];
+      for(int i=0 ; i<size ; i++)
+      {
+        flip[i] = new int[size];
+
+        for(int j=0 ; j<size ; j++)
+          flip[i][j] = flip_info[i][j] + flip_info[j][i];
+      }
 
       for(int i=0 ; i<size ; i++)
       {
-        double min_distance = 1.7e308;
-        int min_idx = -1;
+        for(int j=0 ; j<size ; j++)
+          flipf << flip[i][j] << " ";
+        flipf << std::endl;
+      }
+      flipf << std::endl;
 
-        for(int j=0 ; j<center.size() ; j++)
+      float* conf = new float[size];
+
+      int** link_id = new int*[size];
+      for(int i=0 ; i<size ; i++)
+      {
+        link_id[i] = new int[size];
+
+        for(int j=0 ; j<size ; j++)
         {
-          double distance = IQ_distance(in[i], in[center[j]]);
+          link_id[i][j] = j;
+        }
 
-          if(distance < min_distance)
+        for(int j=0 ; j<size-1 ; j++)
+        {
+          for(int k=j+1 ; k<size ; k++)
           {
-            min_distance = distance;
-            min_idx = j;
+            if(flip[i][j] < flip[i][k])
+            {
+              int temp = flip[i][j];
+              flip[i][j] = flip[i][k];
+              flip[i][k] = temp;
+
+              temp = link_id[i][j];
+              link_id[i][j] = link_id[i][k];
+              link_id[i][k] = temp;
+            }
           }
         }
 
-        clustered_idx.push_back(min_idx);
+        if(flip[i][n_tag] == 0) conf[i] = 1;
+        else conf[i] = flip[i][n_tag-1] / flip[i][n_tag];
       }
 
-      std::ofstream parallel("parallel", std::ios::app);
-      for(int i=0 ; i<center.size() ; i++)
+      for(int i=0 ; i<size ; i++)
       {
-        parallel << "\t\t\t\t\t** cluster " << i << " (I) **" << std::endl;
         for(int j=0 ; j<size ; j++)
-        {
-          if(clustered_idx[j] == i) parallel << in[j].real() << " ";
-        }
-        parallel << std::endl << std::endl;
-
-        parallel << "\t\t\t\t\t** cluster " << i << " (Q) **" << std::endl;
-        for(int j=0 ; j<size ; j++)
-        {
-          if(clustered_idx[j] == i) parallel << in[j].imag() << " ";
-        }
-        parallel << std::endl << std::endl;
+          flipf << flip[i][j] << " ";
+        flipf << std::endl;
       }
-      parallel.close();
+      flipf << std::endl;
 
-      return clustered_idx;
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flipf << link_id[i][j] << " ";
+        flipf << std::endl;
+      }
+      flipf << std::endl;
+
+      int* conf_id = new int[size];
+      for(int i=0 ; i<size ; i++)
+        conf_id[i] = i;
+
+      for(int i=0 ; i<size-1 ; i++)
+      {
+        for(int j=i+1 ; j<size ; j++)
+        {
+          if(conf[i] < conf[j])
+          {
+            float temp = conf[i];
+            conf[i] = conf[j];
+            conf[j] = temp;
+
+            int temp_id = conf_id[i];
+            conf_id[i] = conf_id[j];
+            conf_id[j] = temp_id;
+          }
+        }
+      }
+
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; OFG[conf_id[i]].link.size()<n_tag ; j++)
+        {
+          int candidate_id = link_id[conf_id[i]][j];
+          int k;
+
+          for(k=0 ; k<OFG[conf_id[i]].link.size() ; k++)
+          {
+            if(candidate_id == OFG[conf_id[i]].link[k]) break;
+          }
+
+          if(k == OFG[conf_id[i]].link.size())
+          {
+            OFG[conf_id[i]].link.push_back(candidate_id);
+            for(int x=0 ; x<OFG[conf_id[i]].link.size() ; x++)
+            {
+              std::vector<int> stack;
+              if(check_odd_cycle_OFG(OFG, conf_id[i], OFG[conf_id[i]].link[x], -1, stack) == -1)
+                OFG[conf_id[i]].link.pop_back();
+            }
+          }
+        }
+      }
+
+      flipf<<std::endl<<std::endl;
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<n_tag ; j++)
+          flipf << OFG[i].link[j] << " ";
+        flipf << std::endl;
+      }
+
+      flipf.close();
+
+      for(int i=0 ; i<size ; i++)
+      {
+        delete flip[i];
+        delete link_id[i];
+      }
+
+      delete flip;
+      delete conf;
+      delete link_id;
+    }
+
+    void tag_decoder_impl::determine_OFG_state(OFG_node* OFG, int size, int n_tag)
+    {
+      OFG[0].layer = 0;
+
+      for(int i=0 ; i<n_tag ; i++)
+      {
+        OFG[OFG[0].link[i]].layer = 1;
+        OFG[OFG[0].link[i]].state[i] = 1;
+      }
+
+      for(int i=2 ; i<=n_tag ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+        {
+          if(OFG[j].layer == i-1)
+          {
+            for(int k=0 ; k<n_tag ; k++)
+            {
+              OFG[OFG[j].link[k]].layer = i;
+
+              for(int x=0 ; x<n_tag ; x++)
+              {
+                if(OFG[j].state[x] == 1)
+                  OFG[OFG[j].link[k]].state[x] = 1;
+              }
+            }
+          }
+        }
+      }
+
+      std::ofstream flipf("flip", std::ios::app);
+      for(int i=0 ; i<size ; i++)
+      {
+        flipf << "i=" << i;
+        for(int j=0 ; j<n_tag ; j++)
+          flipf << " " << OFG[i].state[j];
+        flipf << std::endl;
+      }
+      flipf<<std::endl<<std::endl;
+      flipf.close();
+    }
+
+    void tag_decoder_impl::extract_parallel_sample(std::vector<int>* extracted_sample, const std::vector<int> clustered_idx, const OFG_node* OFG, int n_tag)
+    {
+      for(int i=0 ; i<clustered_idx.size() ; i++)
+      {
+        for(int j=0 ; j<n_tag ; j++)
+          extracted_sample[j].push_back(OFG[clustered_idx[i]].state[j]);
+      }
+
+      std::ofstream flipf("flip", std::ios::app);
+      for(int i=0 ; i<n_tag ; i++)
+      {
+        flipf << "\t*** tag " << i << " ***" << std::endl;
+        for(int j=0 ; j<clustered_idx.size() ; j++)
+          flipf << extracted_sample[i][j] << " ";
+        flipf << std::endl << std::endl;
+      }
+      flipf.close();
     }
 
     int
@@ -490,6 +721,36 @@ namespace gr
 
         std::vector<int> center = clustering_algorithm(cut_in, data_idx[1]);
         std::vector<int> clustered_idx = assign_sample_to_cluster(cut_in, data_idx[1], center);
+        int filter_idx = filter_aligned_flip(clustered_idx);
+
+        int** flip_info = new int*[center.size()];
+        for(int i=0 ; i<center.size() ; i++)
+          flip_info[i] = new int[center.size()];
+        count_flip(flip_info, clustered_idx, center.size());
+
+        int n_tag = -1;
+        {
+          int size = center.size();
+          while(size)
+          {
+            size /= 2;
+            n_tag++;
+          }
+        }
+
+        OFG_node* OFG = new OFG_node[center.size()];
+        construct_OFG(OFG, flip_info, center.size(), n_tag);
+        for(int i=0 ; i<center.size() ; i++)
+        {
+          OFG[i].state = new int[n_tag];
+
+          for(int j=0 ; j<n_tag ; j++)
+            OFG[i].state[j] = -1;
+        }
+        determine_OFG_state(OFG, center.size(), n_tag);
+
+        std::vector<int>* extracted_sample = new std::vector<int>[n_tag];
+        extract_parallel_sample(extracted_sample, clustered_idx, OFG, n_tag);
 
         #ifdef DEBUG_MESSAGE
         {
