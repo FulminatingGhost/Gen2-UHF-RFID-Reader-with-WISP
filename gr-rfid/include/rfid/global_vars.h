@@ -34,7 +34,7 @@ namespace gr {
     enum STATUS               {RUNNING, TERMINATED};
     enum GEN2_LOGIC_STATUS  {SEND_QUERY, SEND_ACK, SEND_QUERY_REP, IDLE, SEND_CW, START, SEND_QUERY_ADJUST, SEND_NAK_QR, SEND_NAK_Q, POWER_DOWN};
     enum GATE_STATUS        {GATE_OPEN, GATE_CLOSED, GATE_SEEK_RN16, GATE_SEEK_EPC};
-    enum DECODER_STATUS     {DECODER_DECODE_RN16, DECODER_DECODE_EPC};
+    enum DECODER_STATUS     {DECODER_DECODE_RN16, DECODER_DECODE_EPC, DECODER_TERMINATED};
 
     struct READER_STATS
     {
@@ -76,7 +76,7 @@ namespace gr {
 
     // Termination criteria
     // const int MAX_INVENTORY_ROUND = 50;
-    const int MAX_NUM_QUERIES     = 100000;     // Stop after MAX_NUM_QUERIES have been sent
+    const int MAX_NUM_QUERIES     = 1;     // Stop after MAX_NUM_QUERIES have been sent
 
     // valid values for Q
     const int Q_VALUE [16][4] =

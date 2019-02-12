@@ -1,4 +1,4 @@
-#git pull origin decoding
+git pull origin parallel_clustering
 cd ../build
 make
 make test
