@@ -663,6 +663,26 @@ namespace gr
           flipf << " " << OFG[i].state[j];
         flipf << std::endl;
       }
+      flipf<<std::endl<<std::endl;
+      flipf.close();
+    }
+
+    void tag_decoder_impl::extract_parallel_sample(std::vector<int>* extracted_sample, const std::vector<int> clustered_idx, const OFG_node* OFG, int n_tag)
+    {
+      for(int i=0 ; i<clustered_idx.size() ; i++)
+      {
+        for(int j=0 ; j<n_tag ; j++)
+          extracted_sample[j].push_back(OFG[clustered_idx[i]].state[j]);
+      }
+
+      std::ofstream flipf("flip", std::ios::app);
+      for(int i=0 ; i<n_tag ; i++)
+      {
+        flipf << "\t*** tag " << i << " ***" << std::endl;
+        for(int j=0 ; j<clustered_idx.size() ; j++)
+          flipf << extracted_sample[i][j] << " ";
+        flipf << std::endl << std::endl;
+      }
       flipf.close();
     }
 
@@ -728,6 +748,9 @@ namespace gr
             OFG[i].state[j] = -1;
         }
         determine_OFG_state(OFG, center.size(), n_tag);
+
+        std::vector<int>* extracted_sample = new std::vector<int>[n_tag];
+        extract_parallel_sample(extracted_sample, clustered_idx, OFG, n_tag);
 
         #ifdef DEBUG_MESSAGE
         {

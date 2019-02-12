@@ -66,6 +66,7 @@ namespace gr {
         int check_odd_cycle_OFG(OFG_node* OFG, int start, int compare, int check, std::vector<int> stack);
         void construct_OFG(OFG_node* OFG, int** flip_info, int size, int n_tag);
         void determine_OFG_state(OFG_node* OFG, int size, int n_tag);
+        void extract_parallel_sample(std::vector<int>* extracted_sample, const std::vector<int> clustered_idx, const OFG_node* OFG, int n_tag);
 
         int check_crc(char * bits, int num_bits);
 
