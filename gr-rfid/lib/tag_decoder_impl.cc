@@ -464,6 +464,30 @@ namespace gr
       flip.close();
     }
 
+    int tag_decoder_impl::check_odd_cycle_OFG(OFG_node* OFG, int start, int compare, int check, std::vector<int> stack)
+    {
+      if(start == compare)
+      {
+        if(check == 1) return 1;
+        else return -1;
+      }
+
+      for(int i=0 ; i<stack.size() ; i++)
+      {
+        if(stack[i] == compare) return 0;
+      }
+
+      check *= -1;
+      stack.push_back(compare);
+
+      for(int i=0 ; i<OFG[compare].link.size() ; i++)
+      {
+        if(check_odd_cycle_OFG(OFG, start, OFG[compare].link[i], check, stack) == -1) return -1;
+      }
+
+      return 0;
+    }
+
     void tag_decoder_impl::construct_OFG(OFG_node* OFG, int** flip_info, int size, int n_tag)
     {
       std::ofstream flipf("flip", std::ios::app);
@@ -555,30 +579,30 @@ namespace gr
         }
       }
 
-      int* count = new int[size];
-      for(int i=0 ; i<size ; i++)
-        count[i] = 0;
-
       for(int i=0 ; i<size ; i++)
       {
-        for(int j=0 ; count[i]<n_tag ; j++)
+        for(int j=0 ; OFG[conf_id[i]].link.size()<n_tag ; j++)
         {
           int candidate_id = link_id[conf_id[i]][j];
           int k;
 
-          for(k=0 ; k<n_tag ; k++)
+          for(k=0 ; k<OFG[conf_id[i]].link.size() ; k++)
           {
             if(candidate_id == OFG[conf_id[i]].link[k]) break;
           }
 
-          if(k == n_tag)
+          if(k == OFG[conf_id[i]].link.size())
           {
-            OFG[conf_id[i]].link[count[i]] = candidate_id;
-            count[i]++;
+            OFG[conf_id[i]].link.push_back(candidate_id);
+            for(int x=0 ; x<OFG[conf_id[i]].link.size() ; x++)
+            {
+              std::vector<int> stack;
+              if(check_odd_cycle_OFG(OFG, conf_id[i], OFG[conf_id[i]].link[x], -1, stack) == -1)
+                OFG[conf_id[i]].link.pop_back();
+            }
           }
         }
       }
-
 
       flipf<<std::endl<<std::endl;
       for(int i=0 ; i<size ; i++)
@@ -654,8 +678,8 @@ namespace gr
         }
 
         OFG_node* OFG = new OFG_node[center.size()];
-        for(int i=0 ; i<center.size() ; i++)
-          OFG[i].link = new int[n_tag];
+//      for(int i=0 ; i<center.size() ; i++)
+//          OFG[i].link = new int[n_tag];
         construct_OFG(OFG, flip_info, center.size(), n_tag);
 
         #ifdef DEBUG_MESSAGE

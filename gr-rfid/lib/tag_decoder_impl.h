@@ -48,7 +48,7 @@ namespace gr {
           int id;
           int layer;
           int* state;
-          int* link;
+          std::vector<int> link;
         } OFG_node;
 
         int tag_sync(std::vector<float> in, int size);
@@ -63,6 +63,7 @@ namespace gr {
 
         int filter_aligned_flip(const std::vector<int> clustered_idx);
         void count_flip(int** flip_info, const std::vector<int> clustered_idx, int size);
+        int check_odd_cycle_OFG(OFG_node* OFG, int start, int compare, int check, std::vector<int> stack);
         void construct_OFG(OFG_node* OFG, int** flip_info, int size, int n_tag);
 
         int check_crc(char * bits, int num_bits);
