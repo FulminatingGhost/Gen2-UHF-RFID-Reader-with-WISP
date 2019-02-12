@@ -625,6 +625,47 @@ namespace gr
       delete link_id;
     }
 
+    void tag_decoder_impl::determine_OFG_state(OFG_node* OFG, int size, int n_tag)
+    {
+      OFG[0].layer = 0;
+
+      for(int i=0 ; i<n_tag ; i++)
+      {
+        OFG[OFG[0].link[i]].layer = 1;
+        OFG[OFG[0].link[i]].state[i] = 1;
+      }
+
+      for(int i=2 ; i<=n_tag ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+        {
+          if(OFG[j].layer == i-1)
+          {
+            for(int k=0 ; k<n_tag ; k++)
+            {
+              OFG[OFG[j].link[k]].layer = i;
+
+              for(int x=0 ; x<n_tag ; x++)
+              {
+                if(OFG[j].state[x] == 1)
+                  OFG[OFG[j].link[k]].state[x] = 1;
+              }
+            }
+          }
+        }
+      }
+
+      std::ofstream flipf("flip", std::ios::app);
+      for(int i=0 ; i<size ; i++)
+      {
+        flipf << "i=" << i;
+        for(int j=0 ; j<n_tag ; j++)
+          flipf << " " << OFG[i].state[j];
+        flipf << std::endl;
+      }
+      flipf.close();
+    }
+
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
@@ -678,9 +719,15 @@ namespace gr
         }
 
         OFG_node* OFG = new OFG_node[center.size()];
-//      for(int i=0 ; i<center.size() ; i++)
-//          OFG[i].link = new int[n_tag];
         construct_OFG(OFG, flip_info, center.size(), n_tag);
+        for(int i=0 ; i<center.size() ; i++)
+        {
+          OFG[i].state = new int[n_tag];
+
+          for(int j=0 ; j<n_tag ; j++)
+            OFG[i].state[j] = -1;
+        }
+        determine_OFG_state(OFG, center.size(), n_tag);
 
         #ifdef DEBUG_MESSAGE
         {
