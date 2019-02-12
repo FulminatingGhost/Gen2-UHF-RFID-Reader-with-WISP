@@ -1,4 +1,4 @@
-git pull origin parallel
+git pull origin parallel_clustering
 cd ../build
 make
 make test

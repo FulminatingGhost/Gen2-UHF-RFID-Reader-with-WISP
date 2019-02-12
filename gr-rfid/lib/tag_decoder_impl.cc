@@ -324,12 +324,8 @@ namespace gr
       std::vector<int> min_distance_id;
 
       const double cutoff_distance = 0.001;
-
       double max_local_density = 0;
 
-      std::ofstream parallel("parallel", std::ios::app);
-
-      parallel << "\t\t\t\t\t** local density **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
         int current_local_density = -1;
@@ -339,13 +335,9 @@ namespace gr
           if(IQ_distance(in[i], in[j]) < cutoff_distance) current_local_density++;
         }
 
-        parallel << current_local_density << " ";
         if(current_local_density > max_local_density) max_local_density = current_local_density;
         local_density.push_back(current_local_density);
       }
-      parallel << std::endl << std::endl;
-
-      parallel << "\t\t\t\t\t** local distance **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
         double min_distance = 1;
@@ -358,25 +350,20 @@ namespace gr
           if(distance < min_distance) min_distance = distance;
         }
 
-        parallel << min_distance << " ";
         local_distance.push_back(min_distance);
       }
-      parallel << std::endl << std::endl;
 
       max_local_density /= 10;
       int count = 0;
 
-      parallel << "\t\t\t\t\t** center idx **" << std::endl;
       for(int i=0 ; i<size ; i++)
       {
         if(local_density[i] > max_local_density && local_distance[i] > cutoff_distance)
         {
           center_idx.push_back(i);
-          parallel << i << " ";
           count++;
         }
       }
-      parallel << std::endl << std::endl;
 
       for(int i=0 ; i<center_idx.size() ; i++)
       {
@@ -392,32 +379,8 @@ namespace gr
         }
       }
 
-      parallel << "\t\t\t\t\t** combined center idx **" << std::endl;
-      for(int i=0 ; i<center_idx.size() ; i++)
-      {
-        parallel << center_idx[i] << " ";
-      }
-      parallel << std::endl << std::endl;
-
       if(count == 0) center_idx.push_back(-1);
-      else
-      {
-        parallel << "\t\t\t\t\t** center (I) **" << std::endl;
-        for(int i=0 ; i<center_idx.size() ; i++)
-        {
-          parallel << in[center_idx[i]].real() << " ";
-        }
-        parallel << std::endl << std::endl;
 
-        parallel << "\t\t\t\t\t** center (Q) **" << std::endl;
-        for(int i=0 ; i<center_idx.size() ; i++)
-        {
-          parallel << in[center_idx[i]].imag() << " ";
-        }
-        parallel << std::endl << std::endl;
-      }
-
-      parallel.close();
       return center_idx;
     }
 
@@ -443,25 +406,6 @@ namespace gr
 
         clustered_idx.push_back(min_idx);
       }
-
-      std::ofstream parallel("parallel", std::ios::app);
-      for(int i=0 ; i<center.size() ; i++)
-      {
-        parallel << "\t\t\t\t\t** cluster " << i << " (I) **" << std::endl;
-        for(int j=0 ; j<size ; j++)
-        {
-          if(clustered_idx[j] == i) parallel << in[j].real() << " ";
-        }
-        parallel << std::endl << std::endl;
-
-        parallel << "\t\t\t\t\t** cluster " << i << " (Q) **" << std::endl;
-        for(int j=0 ; j<size ; j++)
-        {
-          if(clustered_idx[j] == i) parallel << in[j].imag() << " ";
-        }
-        parallel << std::endl << std::endl;
-      }
-      parallel.close();
 
       return clustered_idx;
     }
