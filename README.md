@@ -9,7 +9,7 @@ This program is revised version of the Gen2 UHF RFID Reader (https://github.com/
 ### Wireless Identification and Sensing Platform (WISP)
 We use WISP(MSP430) as an RFID tag. Normal data rate of WISP is 460kHz, but we modified to 40kHz in order to communicate with this program. Visit below and install the 40kHz version on your WISP tag.
  * https://github.com/whitecloudy/wisp5_436kHz-40kHz/tree/40kHz
- 
+
 Get more information at below WISP wiki website.
  * http://wisp5.wispsensor.net
 
@@ -27,7 +27,7 @@ $ wget https://github.com/SpiritFlag/Gen2-UHF-RFID-Reader-with-WISP/archive/(ver
 4. Unzip the ".zip" or ".tar.gz" file.
 <pre><code>$ unzip *
 $ tar -xvzf *</code></pre>
- 
+
 5. Execute the script file "init.sh" for initial build.
 <pre><code>$ ./init.sh</code></pre>  
 or type the below instructions manually.  
@@ -87,7 +87,7 @@ Execute the "gr-rfid/apps/reader.py" python file. You must delete the "debug_dat
 
 If you made any change in ".cc" or ".h" file, you must rebuild the program. Execute the script file "build.sh". You don't need to rebuild the program when you only modify the "reader.py" file.
 <pre><code>$ ./build.sh</code></pre>
- 
+
 or type the below instructions manually.
 <pre><code>$ cd ../build && make && make test && sudo make install && sudo ldconfig && cd ../apps</code></pre>
 
@@ -129,11 +129,20 @@ Ubuntu 16.04 64-bit
 GNU Radio 3.7.10.1
 
 ## If you use this software please cite:
-N. Kargas, F. Mavromatis and A. Bletsas, "Fully-Coherent Reader with Commodity SDR for Gen2 FM0 and Computational RFID", IEEE Wireless Communications Letters (WCL), Vol. 4, No. 6, pp. 617-620, Dec. 2015. 
+N. Kargas, F. Mavromatis and A. Bletsas, "Fully-Coherent Reader with Commodity SDR for Gen2 FM0 and Computational RFID", IEEE Wireless Communications Letters (WCL), Vol. 4, No. 6, pp. 617-620, Dec. 2015.
 
 ## Contacts
 ### Revised Version
-Jeong Sin-Gi (e-mail: jsgnwk@csi.skku.edu)  
+ * Developed by  
+Jeong SinGi (e-mail: jsgnwk@csi.skku.edu)  
+Computer Science and Intelligence Lab in Sungkyunkwan University, Suwon, Republic of Korea(ROK, South Korea).
+
+ * Co-worked with  
+Shin JaeMin (e-mail: alex9395@csi.skku.edu)  
+Computer Science and Intelligence Lab in Sungkyunkwan University, Suwon, Republic of Korea(ROK, South Korea).
+
+ * Supervised by  
+Prof. Kim YuSung (e-mail: yskim525@csi.skku.edu)  
 Computer Science and Intelligence Lab in Sungkyunkwan University, Suwon, Republic of Korea(ROK, South Korea).
 
 ### Original Version
