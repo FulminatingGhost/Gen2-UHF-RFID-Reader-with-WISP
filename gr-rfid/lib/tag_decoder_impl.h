@@ -43,6 +43,14 @@ namespace gr {
         FILE *preamble_fp;
         int success_count;
 
+        typedef struct _OFG_node
+        {
+          int id;
+          int layer;
+          int* state;
+          int* link;
+        } OFG_node;
+
         int tag_sync(std::vector<float> in, int size);
         int determine_first_mask_level(std::vector<float> in, int index);
         int decode_single_bit(std::vector<float> in, int index, int mask_level, float* ret_corr);
@@ -55,6 +63,7 @@ namespace gr {
 
         int filter_aligned_flip(const std::vector<int> clustered_idx);
         void count_flip(int** flip_info, const std::vector<int> clustered_idx, int size);
+        void construct_OFG(OFG_node* OFG, int** flip_info, int size, int n_tag);
 
         int check_crc(char * bits, int num_bits);
 

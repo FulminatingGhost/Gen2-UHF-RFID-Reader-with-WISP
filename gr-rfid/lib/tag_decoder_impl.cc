@@ -459,8 +459,146 @@ namespace gr
           flip << flip_info[i][j] << " ";
         flip << std::endl;
       }
+      flip << std::endl;
 
       flip.close();
+    }
+
+    void tag_decoder_impl::construct_OFG(OFG_node* OFG, int** flip_info, int size, int n_tag)
+    {
+      std::ofstream flipf("flip", std::ios::app);
+
+      int** flip = new int*[size];
+      for(int i=0 ; i<size ; i++)
+      {
+        flip[i] = new int[size];
+
+        for(int j=0 ; j<size ; j++)
+          flip[i][j] = flip_info[i][j] + flip_info[j][i];
+      }
+
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flipf << flip[i][j] << " ";
+        flipf << std::endl;
+      }
+      flipf << std::endl;
+
+      float* conf = new float[size];
+
+      int** link_id = new int*[size];
+      for(int i=0 ; i<size ; i++)
+      {
+        link_id[i] = new int[size];
+
+        for(int j=0 ; j<size ; j++)
+        {
+          link_id[i][j] = j;
+        }
+
+        for(int j=0 ; j<size-1 ; j++)
+        {
+          for(int k=j+1 ; k<size ; k++)
+          {
+            if(flip[i][j] < flip[i][k])
+            {
+              int temp = flip[i][j];
+              flip[i][j] = flip[i][k];
+              flip[i][k] = temp;
+
+              temp = link_id[i][j];
+              link_id[i][j] = link_id[i][k];
+              link_id[i][k] = temp;
+            }
+          }
+        }
+
+        if(flip[i][n_tag] == 0) conf[i] = 1;
+        else conf[i] = flip[i][n_tag-1] / flip[i][n_tag];
+      }
+
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flipf << flip[i][j] << " ";
+        flipf << std::endl;
+      }
+      flipf << std::endl;
+
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<size ; j++)
+          flipf << link_id[i][j] << " ";
+        flipf << std::endl;
+      }
+      flipf << std::endl;
+
+      int* conf_id = new int[size];
+      for(int i=0 ; i<size ; i++)
+        conf_id[i] = i;
+
+      for(int i=0 ; i<size-1 ; i++)
+      {
+        for(int j=i+1 ; j<size ; j++)
+        {
+          if(conf[i] < conf[j])
+          {
+            float temp = conf[i];
+            conf[i] = conf[j];
+            conf[j] = temp;
+
+            int temp_id = conf_id[i];
+            conf_id[i] = conf_id[j];
+            conf_id[j] = temp_id;
+          }
+        }
+      }
+
+      int* count = new int[size];
+      for(int i=0 ; i<size ; i++)
+        count[i] = 0;
+
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; count[i]<n_tag ; j++)
+        {
+          int candidate_id = link_id[conf_id[i]][j];
+          int k;
+
+          for(k=0 ; k<n_tag ; k++)
+          {
+            if(candidate_id == OFG[conf_id[i]].link[k]) break;
+          }
+
+          if(k == n_tag)
+          {
+            OFG[conf_id[i]].link[count[i]] = candidate_id;
+            count[i]++;
+          }
+        }
+      }
+
+
+      flipf<<std::endl<<std::endl;
+      for(int i=0 ; i<size ; i++)
+      {
+        for(int j=0 ; j<n_tag ; j++)
+          flipf << OFG[i].link[j] << " ";
+        flipf << std::endl;
+      }
+
+      flipf.close();
+
+      for(int i=0 ; i<size ; i++)
+      {
+        delete flip[i];
+        delete link_id[i];
+      }
+
+      delete flip;
+      delete conf;
+      delete link_id;
     }
 
     int
@@ -504,6 +642,21 @@ namespace gr
         for(int i=0 ; i<center.size() ; i++)
           flip_info[i] = new int[center.size()];
         count_flip(flip_info, clustered_idx, center.size());
+
+        int n_tag = -1;
+        {
+          int size = center.size();
+          while(size)
+          {
+            size /= 2;
+            n_tag++;
+          }
+        }
+
+        OFG_node* OFG = new OFG_node[center.size()];
+        for(int i=0 ; i<center.size() ; i++)
+          OFG[i].link = new int[n_tag];
+        construct_OFG(OFG, flip_info, center.size(), n_tag);
 
         #ifdef DEBUG_MESSAGE
         {
