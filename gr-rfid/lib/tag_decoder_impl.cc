@@ -378,6 +378,27 @@ namespace gr
       }
       parallel << std::endl << std::endl;
 
+      for(int i=0 ; i<center_idx.size() ; i++)
+      {
+        for(int j=i ; j<center_idx.size() ; j++)
+        {
+          if(i == j) continue;
+
+          if(IQ_distance(in[center_idx[i]], in[center_idx[j]]) < cutoff_distance)
+          {
+            center_idx.erase(center_idx.begin() + j);
+            j--;
+          }
+        }
+      }
+
+      parallel << "\t\t\t\t\t** combined center idx **" << std::endl;
+      for(int i=0 ; i<center_idx.size() ; i++)
+      {
+        parallel << center_idx[i] << " ";
+      }
+      parallel << std::endl << std::endl;
+
       if(count == 0) center_idx.push_back(-1);
       else
       {
