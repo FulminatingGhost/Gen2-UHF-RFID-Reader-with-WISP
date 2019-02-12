@@ -410,6 +410,51 @@ namespace gr
       return clustered_idx;
     }
 
+    std::vector<int> tag_decoder_impl::assign_sample_to_cluster(const std::vector<gr_complex> in, const int size, const std::vector<int> center)
+    {
+      std::vector<int> clustered_idx;
+
+      for(int i=0 ; i<size ; i++)
+      {
+        double min_distance = 1.7e308;
+        int min_idx = -1;
+
+        for(int j=0 ; j<center.size() ; j++)
+        {
+          double distance = IQ_distance(in[i], in[center[j]]);
+
+          if(distance < min_distance)
+          {
+            min_distance = distance;
+            min_idx = j;
+          }
+        }
+
+        clustered_idx.push_back(min_idx);
+      }
+
+      std::ofstream parallel("parallel", std::ios::app);
+      for(int i=0 ; i<center.size() ; i++)
+      {
+        parallel << "\t\t\t\t\t** cluster " << i << " (I) **" << std::endl;
+        for(int j=0 ; j<size ; j++)
+        {
+          if(clustered_idx[j] == i) parallel << in[j].real() << " ";
+        }
+        parallel << std::endl << std::endl;
+
+        parallel << "\t\t\t\t\t** cluster " << i << " (Q) **" << std::endl;
+        for(int j=0 ; j<size ; j++)
+        {
+          if(clustered_idx[j] == i) parallel << in[j].imag() << " ";
+        }
+        parallel << std::endl << std::endl;
+      }
+      parallel.close();
+
+      return clustered_idx;
+    }
+
     int
     tag_decoder_impl::general_work (int noutput_items,
       gr_vector_int &ninput_items,
