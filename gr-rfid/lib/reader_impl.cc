@@ -322,7 +322,7 @@ namespace gr
         log << "│ Send Query | Q= " << q_value << std::endl;
         log << "├──────────────────────────────────────────────────" << std::endl;
         log.close();
-        std::cout << "Query(Q=" << q_value << ") | ";
+        std::cout << "Query(Q=" << q_value << ")\t| ";
 
         // Return to IDLE
         reader_state->gen2_logic_status = IDLE;
@@ -400,7 +400,7 @@ namespace gr
         log << "│ Send QueryRep" << std::endl;
         log << "├──────────────────────────────────────────────────" << std::endl;
         log.close();
-        std::cout << "QueryRep | \t";
+        std::cout << "QueryRep\t| ";
 
         reader_state->gen2_logic_status = IDLE;    // Return to IDLE
         break;
