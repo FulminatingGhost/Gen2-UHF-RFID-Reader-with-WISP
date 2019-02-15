@@ -1,4 +1,4 @@
-#git pull origin decoding
+git pull origin exp
 cd ../build
 make
 make test
