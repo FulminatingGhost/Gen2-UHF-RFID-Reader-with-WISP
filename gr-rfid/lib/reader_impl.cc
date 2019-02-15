@@ -400,7 +400,7 @@ namespace gr
         log << "│ Send QueryRep" << std::endl;
         log << "├──────────────────────────────────────────────────" << std::endl;
         log.close();
-        std::cout << "QueryRep\t| ";
+        std::cout << "QueryRep\t\t| ";
 
         reader_state->gen2_logic_status = IDLE;    // Return to IDLE
         break;
