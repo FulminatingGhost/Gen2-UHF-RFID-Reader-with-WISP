@@ -177,8 +177,6 @@ namespace gr
     int reader_impl::calc_usec(const struct timeval start, const struct timeval end)
     {
       int sec = end.tv_sec - start.tv_sec;
-      std::cout << start.tv_sec << " " << end.tv_sec << std::endl;
-      std::cout << start.tv_usec << " " << end.tv_usec << std::endl;
       int usec = sec * 1e6;
       return usec + end.tv_usec - start.tv_usec;
     }
@@ -217,7 +215,7 @@ namespace gr
       gettimeofday (&reader_state-> reader_stats.end, NULL);
       int execution_time = calc_usec(reader_state->reader_stats.start, reader_state->reader_stats.end);
       result << "│ Execution time: " << execution_time << " (μs)" << std::endl;
-      result << "│ Throughput(success EPC bits / time): " << reader_state->reader_stats.n_epc_correct * EPC_BITS / execution_time * 1e6 << " (bits/second)" << std::endl;
+      result << "│ Throughput(EPC): " << (double)reader_state->reader_stats.n_epc_correct * (EPC_BITS - 1) / execution_time * 1e6 << " (bits/second)" << std::endl;
       result << "└──────────────────────────────────────────────────" << std::endl;
 
       result.close();
