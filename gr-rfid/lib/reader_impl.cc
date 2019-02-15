@@ -206,7 +206,7 @@ namespace gr
         result << "├──────────────────────────────────────────────────" << std::endl;
 
       gettimeofday (&reader_state-> reader_stats.end, NULL);
-      tv_usec execution_time = reader_state-> reader_stats.end.tv_usec - reader_state-> reader_stats.start.tv_usec;
+      suseconds_t execution_time = reader_state-> reader_stats.end.tv_usec - reader_state-> reader_stats.start.tv_usec;
       result << "│ Execution time: " << execution_time << " (μs)" << std::endl;
       result << "│ Throughput(success EPC bits / time): " << reader_state->reader_stats.n_epc_correct * EPC_BITS / execution_time * 1e6 << " (bits/second)" << std::endl;
       result << "└──────────────────────────────────────────────────" << std::endl;
