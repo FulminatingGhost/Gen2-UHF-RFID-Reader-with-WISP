@@ -289,7 +289,7 @@ namespace gr
         log << std::endl << "┌──────────────────────────────────────────────────" << std::endl;
         log << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
         log.close();
-        std::cout << std::endl << "[" << reader_state->reader_stats.cur_inventory_round << "_" << reader_state->reader_stats.cur_slot_number << "] ";
+        std::cout << std::endl << "[" << reader_state->reader_stats.cur_inventory_round << "_" << reader_state->reader_stats.cur_slot_number << "]\t";
         reader_state->reader_stats.n_queries_sent +=1;
 
         // Controls the other two blocks
@@ -383,7 +383,7 @@ namespace gr
         log.open("debug_message", std::ios::app);
         log << "│ Inventory Round: " << reader_state->reader_stats.cur_inventory_round << " | Slot Number: " << reader_state->reader_stats.cur_slot_number << std::endl;
         log.close();
-        std::cout << std::endl << "[" << reader_state->reader_stats.cur_inventory_round << "_" << reader_state->reader_stats.cur_slot_number << "] ";
+        std::cout << std::endl << "[" << reader_state->reader_stats.cur_inventory_round << "_" << reader_state->reader_stats.cur_slot_number << "]\t";
 
         // Controls the other two blocks
         reader_state->decoder_status = DECODER_DECODE_RN16;
@@ -400,7 +400,7 @@ namespace gr
         log << "│ Send QueryRep" << std::endl;
         log << "├──────────────────────────────────────────────────" << std::endl;
         log.close();
-        std::cout << "QueryRep\t\t| ";
+        std::cout << "QueryRep\t| ";
 
         reader_state->gen2_logic_status = IDLE;    // Return to IDLE
         break;
