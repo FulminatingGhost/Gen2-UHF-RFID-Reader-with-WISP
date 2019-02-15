@@ -177,6 +177,8 @@ namespace gr
     int reader_impl::calc_usec(const struct timeval start, const struct timeval end)
     {
       int sec = start.tv_sec - end.tv_sec;
+      std::cout << start.tv_sec << " " << end.tv_sec << std::endl;
+      std::cout << start.tv_usec << " " << end.tv_usec << std::endl;
       int usec = sec * 1e6;
       return usec + start.tv_usec - end.tv_usec;
     }
