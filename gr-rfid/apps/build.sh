@@ -1,4 +1,4 @@
-git pull origin flip
+git pull origin dec
 cd ../build
 make
 make test
