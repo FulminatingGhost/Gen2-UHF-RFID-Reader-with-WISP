@@ -379,6 +379,40 @@ namespace gr
         }
       }
 
+      int n_tag = -1;
+      {
+        int size = center_idx.size();
+        while(size)
+        {
+          size /= 2;
+          n_tag++;
+        }
+      }
+
+      int erase = center_idx.size() - pow(2, n_tag);
+      for(; erase>0 ; erase--)
+      {
+        double min_distance = 0;
+        int min_idx = -1;
+
+        for(int i=0 ; i<center_idx.size() ; i++)
+        {
+          for(int j=i ; j<center_idx.size() ; j++)
+          {
+            if(i == j) continue;
+
+            double distance = IQ_distance(in[center_idx[i]], in[center_idx[j]]);
+            if(distance < min_distance)
+            {
+              min_distance = distance;
+              min_idx = j;
+            }
+          }
+        }
+
+        center_idx.erase(center_idx.begin() + min_idx);
+      }
+
       if(count == 0) center_idx.push_back(-1);
 
       return center_idx;
@@ -635,6 +669,16 @@ namespace gr
         OFG[OFG[0].link[i]].state[i] = 1;
       }
 
+      std::ofstream flipf("flip", std::ios::app);
+      for(int i=0 ; i<size ; i++)
+      {
+        flipf << "i=" << i;
+        for(int j=0 ; j<n_tag ; j++)
+          flipf << " " << OFG[i].state[j];
+        flipf << std::endl;
+      }
+      flipf<<std::endl<<std::endl;
+
       for(int i=2 ; i<=n_tag ; i++)
       {
         for(int j=0 ; j<size ; j++)
@@ -643,6 +687,7 @@ namespace gr
           {
             for(int k=0 ; k<n_tag ; k++)
             {
+              if(OFG[OFG[j].link[k]].layer < i) continue;
               OFG[OFG[j].link[k]].layer = i;
 
               for(int x=0 ; x<n_tag ; x++)
@@ -653,9 +698,18 @@ namespace gr
             }
           }
         }
+
+
+        for(int i=0 ; i<size ; i++)
+        {
+          flipf << "i=" << i;
+          for(int j=0 ; j<n_tag ; j++)
+            flipf << " " << OFG[i].state[j];
+          flipf << std::endl;
+        }
+        flipf<<std::endl<<std::endl;
       }
 
-      std::ofstream flipf("flip", std::ios::app);
       for(int i=0 ; i<size ; i++)
       {
         flipf << "i=" << i;
@@ -721,7 +775,7 @@ namespace gr
 
         std::vector<int> center = clustering_algorithm(cut_in, data_idx[1]);
         std::vector<int> clustered_idx = assign_sample_to_cluster(cut_in, data_idx[1], center);
-        int filter_idx = filter_aligned_flip(clustered_idx);
+        //int filter_idx = filter_aligned_flip(clustered_idx);
 
         int** flip_info = new int*[center.size()];
         for(int i=0 ; i<center.size() ; i++)
@@ -742,8 +796,8 @@ namespace gr
         construct_OFG(OFG, flip_info, center.size(), n_tag);
         for(int i=0 ; i<center.size() ; i++)
         {
+          OFG[i].layer = n_tag + 1;
           OFG[i].state = new int[n_tag];
-
           for(int j=0 ; j<n_tag ; j++)
             OFG[i].state[j] = -1;
         }
