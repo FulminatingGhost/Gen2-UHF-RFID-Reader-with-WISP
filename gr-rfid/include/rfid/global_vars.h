@@ -26,7 +26,7 @@
 #include <sys/time.h>
 #include <fstream>
 
-#define DEBUG_MESSAGE
+//#define DEBUG_MESSAGE
 
 namespace gr {
   namespace rfid {
@@ -92,7 +92,7 @@ namespace gr {
     // Duration in us
     const int CW_D         = 250;    // Carrier wave
     const int P_DOWN_D     = 2000;    // power down
-    const int T1_D         = 150;    // Time from Interrogator transmission to Tag response (250 us)
+    const int T1_D         = 250;    // Time from Interrogator transmission to Tag response (250 us)
     const int T2_D         = 500;    // Time from Tag response to Interrogator transmission. Max value = 20.0 * T_tag = 500us
     const int PW_D         = 12;      // Half Tari
     const int DELIM_D       = 12;      // A preamble shall comprise a fixed-length start delimiter 12.5us +/-5%
