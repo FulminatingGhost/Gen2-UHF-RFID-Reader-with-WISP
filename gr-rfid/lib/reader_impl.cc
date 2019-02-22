@@ -66,7 +66,7 @@ namespace gr
 
       // CW waveforms of different sizes
       n_cwquery_s   = (T1_D+T2_D+RN16_D)/sample_d;     //RN16
-      n_cwack_s     = 2*(3*T1_D+T2_D+EPC_D)/sample_d;    //EPC   if it is longer than nominal it wont cause tags to change inventoried flag
+      n_cwack_s     = (3*T1_D+T2_D+EPC_D)/sample_d;    //EPC   if it is longer than nominal it wont cause tags to change inventoried flag
       n_p_down_s     = (P_DOWN_D)/sample_d;
 
       p_down.resize(n_p_down_s);        // Power down samples
