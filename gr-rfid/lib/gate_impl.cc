@@ -167,7 +167,7 @@ namespace gr
 
               reader_state->magn_squared_samples.resize(0);
 
-              reader_state->magn_squared_samples.push_back(std::norm(in[i])) - dc_est));
+              reader_state->magn_squared_samples.push_back(std::norm(in[i]) - dc_est));
               out[written] = in[i] - dc_est; // Remove offset from complex samples
               written++;
 
@@ -179,7 +179,7 @@ namespace gr
           {
             n_samples++;
 
-            reader_state->magn_squared_samples.push_back(std::norm(in[i])) - dc_est));
+            reader_state->magn_squared_samples.push_back(std::norm(in[i]) - dc_est));
             out[written] = in[i] - dc_est; // Remove offset from complex samples
 
             written++;
