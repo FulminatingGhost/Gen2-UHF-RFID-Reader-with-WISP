@@ -204,9 +204,10 @@ namespace gr
         float corr = 0.0f;
         for(int j=0; j<4; j++)
         {
-          for(int k = (index + (j-1)*(n_samples_TAG_BIT*0.5)) ; k<(n_samples_TAG_BIT*0.5) ; k++)
+          int start = index + (j-1)*(n_samples_TAG_BIT*0.5);
+          for(int k=0 ; k<(n_samples_TAG_BIT*0.5) ; k++)
           {
-            float scaled_amp = (norm_in[k] - average_amp) / average_abs_amp;
+            float scaled_amp = (norm_in[start+k] - average_amp) / average_abs_amp;
             corr += masks[mask_level][i][j] * scaled_amp;
           }
         }
